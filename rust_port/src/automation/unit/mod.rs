@@ -1,0 +1,25 @@
+pub mod air_unit_automation;
+pub mod battle_helper;
+pub mod city_location_tile_ranker;
+pub mod civilian_unit_automation;
+pub mod head_towards_enemy_city_automation;
+pub mod head_towards_improvement_automation;
+pub mod head_towards_resource_automation;
+pub mod head_towards_ruins_automation;
+pub mod head_towards_settler_automation;
+pub mod head_towards_unit_automation;
+pub mod improvement_automation;
+pub mod unit_automation;
+
+pub use air_unit_automation::AirUnitAutomation;
+pub use battle_helper::BattleHelper;
+pub use city_location_tile_ranker::CityLocationTileRanker;
+pub use civilian_unit_automation::CivilianUnitAutomation;
+pub use head_towards_enemy_city_automation::HeadTowardsEnemyCityAutomation;
+pub use head_towards_improvement_automation::HeadTowardsImprovementAutomation;
+pub use head_towards_resource_automation::HeadTowardsResourceAutomation;
+pub use head_towards_ruins_automation::HeadTowardsRuinsAutomation;
+pub use head_towards_settler_automation::HeadTowardsSettlerAutomation;
+pub use head_towards_unit_automation::HeadTowardsUnitAutomation;
+pub use improvement_automation::ImprovementAutomation;
+pub use unit_automation::UnitAutomation;

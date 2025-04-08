@@ -1,0 +1,2 @@
+cargo:rustc-link-search=native=vendors/SDL3/lib/x64
+cargo:rustc-link-lib=SDL3
