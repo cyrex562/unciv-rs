@@ -1,2 +1,35 @@
-rust_port/target
+rust_port/target/
 rust_port/Cargo.lock
+
+# Rust build artifacts
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Debug files
+*.pdb
+
+# Environment files
+.env
+.env.local
+
+# Documentation
+/doc/
+/docs/
+
+# Generated files
+*.o
+*.so
+*.dylib
+*.dll
+
+# Backup files
+*.bak
+*~
