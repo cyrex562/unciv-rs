@@ -127,4 +127,23 @@ impl Constants {
     pub const UNCIV_REPO_URL: &'static str = "https://github.com/yairm210/Unciv/";
     /// URL to the wiki, including trailing slash
     pub const WIKI_URL: &'static str = "https://yairm210.github.io/Unciv/";
+
+    // File extensions
+    pub const SAVE_FILE_EXTENSION: &'static str = "json";
+    pub const MAP_FILE_EXTENSION: &'static str = "map";
+    pub const MOD_FILE_EXTENSION: &'static str = "zip";
+
+    // Directories
+    pub const MODS_FOLDER_NAME: &'static str = "mods";
+    pub const SAVES_FOLDER_NAME: &'static str = "saves";
+    pub const MAPS_FOLDER_NAME: &'static str = "maps";
+    pub const MUSIC_FOLDER_NAME: &'static str = "music";
+    pub const SOUNDS_FOLDER_NAME: &'static str = "sounds";
+    pub const VOICE_FOLDER_NAME: &'static str = "voice";
+    pub const IMAGES_FOLDER_NAME: &'static str = "images";
+
+    // File paths
+    pub const ATLAS_PATH: &'static str = "game.atlas";
+    pub const SKIN_PATH: &'static str = "skin/skin.json";
+    pub const FONT_PATH: &'static str = "fonts/OpenSans-Regular.ttf";
 }

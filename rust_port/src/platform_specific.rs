@@ -1,36 +1,46 @@
 /// Trait for platform-specific functionality
 pub trait PlatformSpecific: Send + Sync {
-    /// Notifies player that their multiplayer turn started
-    fn notify_turn_started(&self) {}
+    /// Notify the player with a message
+    fn notify_player(&self, message: &str);
 
-    /// Install system audio hooks
-    fn install_audio_hooks(&self) {}
+    /// Install audio hooks for the platform
+    fn install_audio_hooks(&self);
 
-    /// If not None, this is the path to the directory in which to store the local files - mods, saves, maps, etc
-    fn custom_data_directory(&self) -> Option<String> {
-        None
-    }
+    /// Get the custom data directory for the platform
+    fn get_custom_data_directory(&self) -> Option<PathBuf>;
 }
 
 /// Default implementation of PlatformSpecific
 pub struct DefaultPlatformSpecific;
 
-impl PlatformSpecific for DefaultPlatformSpecific {}
+impl PlatformSpecific for DefaultPlatformSpecific {
+    fn notify_player(&self, _message: &str) {
+        // Default implementation does nothing
+    }
 
-// Global instance
-lazy_static::lazy_static! {
-    static ref PLATFORM_SPECIFIC: std::sync::Arc<dyn PlatformSpecific> = std::sync::Arc::new(DefaultPlatformSpecific);
+    fn install_audio_hooks(&self) {
+        // Default implementation does nothing
+    }
+
+    fn get_custom_data_directory(&self) -> Option<PathBuf> {
+        None
+    }
+}
+
+lazy_static! {
+    /// Global instance of the platform-specific implementation
+    pub static ref PLATFORM_SPECIFIC: Arc<dyn PlatformSpecific> = Arc::new(DefaultPlatformSpecific);
 }
 
 /// Initialize the global PlatformSpecific instance with a custom implementation
-pub fn init_platform_specific(platform: std::sync::Arc<dyn PlatformSpecific>) {
+pub fn init_platform_specific(platform: Arc<dyn PlatformSpecific>) {
     unsafe {
-        let platform_ptr = &PLATFORM_SPECIFIC as *const std::sync::Arc<dyn PlatformSpecific> as *mut std::sync::Arc<dyn PlatformSpecific>;
+        let platform_ptr = &PLATFORM_SPECIFIC as *const Arc<dyn PlatformSpecific> as *mut Arc<dyn PlatformSpecific>;
         *platform_ptr = platform;
     }
 }
 
 /// Get the global PlatformSpecific instance
-pub fn get_platform_specific() -> std::sync::Arc<dyn PlatformSpecific> {
+pub fn get_platform_specific() -> Arc<dyn PlatformSpecific> {
     PLATFORM_SPECIFIC.clone()
 }

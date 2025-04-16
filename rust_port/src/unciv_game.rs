@@ -5,6 +5,7 @@ use std::thread;
 use std::io::Write;
 use std::fs::File;
 use uuid::Uuid;
+use lazy_static::lazy_static;
 
 /// Represents the Unciv app itself:
 /// - implements the Game interface Gdx requires.
@@ -35,6 +36,11 @@ pub struct UncivGame {
     screen_stack: Mutex<VecDeque<Arc<dyn BaseScreen>>>,
 }
 
+/// Game settings that can be modified by the user
+pub struct GameSettings {
+    pub visual_mods: Vec<String>,
+}
+
 impl UncivGame {
     /// Creates a new UncivGame instance
     pub fn new(is_console_mode: bool) -> Arc<Self> {
@@ -55,7 +61,7 @@ impl UncivGame {
         });
 
         // Set the current instance
-        CURRENT.lock().unwrap().replace(Arc::clone(&game));
+        CURRENT_GAME.lock().unwrap().replace(Arc::clone(&game));
 
         game
     }
@@ -690,39 +696,24 @@ impl UncivGame {
 
 /// Global reference to the one Gdx.Game instance created by the platform launchers
 lazy_static! {
-    static ref CURRENT: Mutex<Option<Arc<UncivGame>>> = Mutex::new(None);
+    static ref CURRENT_GAME: Mutex<Option<Arc<UncivGame>>> = Mutex::new(None);
 }
 
 impl UncivGame {
-    /// Get the current game instance
-    pub fn current() -> Arc<Self> {
-        CURRENT.lock().unwrap().as_ref().expect("UncivGame::current() called before initialization").clone()
-    }
-
-    /// Check if the current game is initialized
+    /// Check if the game is currently initialized
     pub fn is_current_initialized() -> bool {
-        CURRENT.lock().unwrap().is_some()
+        CURRENT_GAME.lock().unwrap().is_some()
     }
 
-    /// Get the game info or null
-    pub fn get_game_info_or_null() -> Option<Arc<GameInfo>> {
-        if Self::is_current_initialized() {
-            Self::current().game_info()
-        } else {
-            None
-        }
+    /// Get the current game instance
+    pub fn current() -> Arc<UncivGame> {
+        CURRENT_GAME.lock().unwrap().as_ref().expect("Game not initialized").clone()
     }
 
-    /// Check if the current game is the specified game
-    pub fn is_current_game(game_id: &str) -> bool {
-        Self::is_current_initialized() &&
-        Self::current().game_info().is_some() &&
-        Self::current().game_info().unwrap().game_id == game_id
-    }
-
-    /// Check if a deep linked game is loading
-    pub fn is_deep_linked_game_loading() -> bool {
-        Self::is_current_initialized() && Self::current().deep_linked_multiplayer_game().is_some()
+    /// Get the game info or null if not initialized
+    pub fn get_game_info_or_null(&self) -> Option<GameInfo> {
+        // TODO: Implement this
+        None
     }
 }
 
