@@ -33,3 +33,4 @@ Cargo.lock
 # Backup files
 *.bak
 *~
+rust_port/target/.rustc_info.json
