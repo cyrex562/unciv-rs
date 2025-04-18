@@ -1,72 +1,104 @@
-use std::ffi::c_void;
-use libc::{c_int, c_uint, c_char};
+// Main entry point for the Unciv Rust port
 
-mod serializers;
-mod json;
-mod automation;
-mod models;
+mod ui;
 
-#[link(name = "SDL3")]
-extern "C" {
-    fn SDL_Init(flags: c_uint) -> c_int;
-    fn SDL_Quit();
-    fn SDL_CreateWindow(title: *const c_char, x: c_int, y: c_int, w: c_int, h: c_int, flags: c_uint) -> *mut c_void;
-    fn SDL_DestroyWindow(window: *mut c_void);
-    fn SDL_PollEvent(event: *mut c_void) -> c_int;
-    fn SDL_Delay(ms: c_uint);
+use eframe::egui;
+use log::info;
+use std::rc::Rc;
+
+use ui::{
+    popups::{AskTextPopup, AuthPopup},
+    screens::basescreen::BaseScreen,
+};
+
+fn main() -> Result<(), eframe::Error> {
+    // Initialize logging
+    env_logger::init();
+    info!("Starting Unciv Rust port");
+
+    // Create the application
+    let options = eframe::NativeOptions {
+        initial_window_size: Some(egui::vec2(1024.0, 768.0)),
+        ..Default::default()
+    };
+
+    // Run the application
+    eframe::run_native(
+        "Unciv Rust",
+        options,
+        Box::new(|cc| Box::new(UncivApp::new(cc))),
+    )
 }
 
-const SDL_INIT_VIDEO: c_uint = 0x00000020;
-const SDL_WINDOWPOS_CENTERED: c_int = 0x2FFF0000;
-const SDL_WINDOW_SHOWN: c_uint = 0x00000004;
-
-#[repr(C)]
-struct SDL_Event {
-    _type: c_uint,
-    _padding: [c_char; 56],
+/// Main application struct
+struct UncivApp {
+    // Application state
+    base_screen: Rc<BaseScreen>,
+    active_popup: Option<Box<dyn ui::popups::Popup>>,
 }
 
-const SDL_QUIT: c_uint = 0x100;
+impl UncivApp {
+    /// Create a new UncivApp
+    fn new(cc: &eframe::CreationContext<'_>) -> Self {
+        // Create the base screen
+        let base_screen = Rc::new(BaseScreen::new(Rc::new(cc.egui_ctx.clone())));
 
-fn main() -> Result<(), String> {
-    unsafe {
-        if SDL_Init(SDL_INIT_VIDEO) != 0 {
-            return Err("Failed to initialize SDL".to_string());
+        Self {
+            base_screen,
+            active_popup: None,
         }
-
-        let title = std::ffi::CString::new("Rust Port").unwrap();
-        let window = SDL_CreateWindow(
-            title.as_ptr(),
-            SDL_WINDOWPOS_CENTERED,
-            SDL_WINDOWPOS_CENTERED,
-            800,
-            600,
-            SDL_WINDOW_SHOWN,
-        );
-
-        if window.is_null() {
-            SDL_Quit();
-            return Err("Failed to create window".to_string());
-        }
-
-        let mut event = SDL_Event {
-            _type: 0,
-            _padding: [0; 56],
-        };
-
-        'running: loop {
-            while SDL_PollEvent(&mut event as *mut _ as *mut c_void) != 0 {
-                if event._type == SDL_QUIT {
-                    break 'running;
-                }
-            }
-
-            SDL_Delay(16); // ~60 FPS
-        }
-
-        SDL_DestroyWindow(window);
-        SDL_Quit();
     }
 
-    Ok(())
+    /// Show the AskTextPopup
+    fn show_ask_text_popup(&mut self) {
+        let screen = self.base_screen.clone();
+        let popup = AskTextPopup::default(screen);
+        self.active_popup = Some(Box::new(popup));
+    }
+
+    /// Show the AuthPopup
+    fn show_auth_popup(&mut self) {
+        let screen = self.base_screen.clone();
+        let auth_successful = Rc::new(|success: bool| {
+            info!("Authentication {}", if success { "successful" } else { "failed" });
+        });
+
+        let popup = AuthPopup::new(screen, Some(auth_successful));
+        self.active_popup = Some(Box::new(popup));
+    }
+}
+
+impl eframe::App for UncivApp {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        // Main application update loop
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.heading("Unciv Rust Port");
+            ui.label("Welcome to the Unciv Rust port!");
+
+            ui.add_space(10.0);
+
+            // Add buttons to show popups
+            ui.horizontal(|ui| {
+                if ui.button("Show AskTextPopup").clicked() {
+                    self.show_ask_text_popup();
+                }
+
+                if ui.button("Show AuthPopup").clicked() {
+                    self.show_auth_popup();
+                }
+            });
+        });
+
+        // Show active popup if any
+        if let Some(popup) = &mut self.active_popup {
+            egui::Window::new(popup.title())
+                .collapsible(false)
+                .resizable(false)
+                .show(ctx, |ui| {
+                    if popup.show(ui) {
+                        self.active_popup = None;
+                    }
+                });
+        }
+    }
 }
