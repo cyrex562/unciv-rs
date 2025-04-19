@@ -914,18 +914,6 @@ impl Translations {
     pub fn set_translation_active_mods(&self, mods: &[String]) {}
 }
 
-pub struct BaseScreen {
-    // Implementation details
-}
-
-impl BaseScreen {
-    pub fn set_skin() {}
-
-    pub fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
-}
-
 pub trait BaseScreen: Send + Sync {
     fn stage(&self) -> Option<Stage>;
     fn resize(&self, width: i32, height: i32);
@@ -933,6 +921,10 @@ pub trait BaseScreen: Send + Sync {
     fn resume(&self);
     fn dispose(&self);
     fn as_any(&self) -> &dyn std::any::Any;
+}
+
+impl dyn BaseScreen {
+    pub fn set_skin() {}
 }
 
 pub struct Stage {
@@ -1072,7 +1064,29 @@ impl CrashScreen {
 }
 
 impl BaseScreen for CrashScreen {
-    // Implementation would be provided elsewhere
+    fn stage(&self) -> Option<Stage> {
+        None
+    }
+
+    fn resize(&self, _width: i32, _height: i32) {
+        // Empty implementation
+    }
+
+    fn render(&self) {
+        // Empty implementation
+    }
+
+    fn resume(&self) {
+        // Empty implementation
+    }
+
+    fn dispose(&self) {
+        // Empty implementation
+    }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 pub struct Popup {
@@ -1425,6 +1439,6 @@ impl<T: 'static> Is for T {
     }
 }
 
-pub fn debug(format: &str, args: std::fmt::Arguments) {
-    println!(format, args);
+pub fn debug(message: &str) {
+    println!("{}", message);
 }

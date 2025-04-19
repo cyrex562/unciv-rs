@@ -11,6 +11,13 @@ pub mod barbarians;
 pub mod barbarian_manager;
 pub mod diplomacy;
 pub mod trade;
+pub mod multiplayer;
+pub mod skins;
+pub mod stats;
+pub mod tilesets;
+pub mod translations;
+pub mod tile_map;
+
 
 pub use barbarian_manager::BarbarianManager;
 pub use diplomacy::{DiplomacyManager, DiplomacyFlags, DiplomaticStatus, RelationshipLevel};

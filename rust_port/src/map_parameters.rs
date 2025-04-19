@@ -1,8 +1,9 @@
 use std::collections::HashSet;
 use std::time::{SystemTime, UNIX_EPOCH};
+use serde::{Serialize, Deserialize};
 use crate::map::hex_math::HexMath;
-use crate::map::map_generator::MapResourceSetting;
-use crate::models::metadata::BaseRuleset;
+use crate::map::mapgenerator::map_resource_setting::MapResourceSetting;
+use crate::ruleset::base_ruleset::BaseRuleset;
 
 /// Map shape constants
 pub struct MapShape;
@@ -69,7 +70,7 @@ impl MapSize {
 }
 
 /// Map size parameters
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MapSizeParams {
     pub name: String,
     pub width: i32,
@@ -78,44 +79,47 @@ pub struct MapSizeParams {
 }
 
 impl MapSizeParams {
-    pub const TINY: MapSizeParams = MapSizeParams {
-        name: MapSize::TINY,
-        width: 20,
-        height: 15,
-        radius: 5,
-    };
+    fn new(name: &str, width: i32, height: i32, radius: i32) -> Self {
+        Self {
+            name: name.to_string(),
+            width,
+            height,
+            radius,
+        }
+    }
+}
 
-    pub const SMALL: MapSizeParams = MapSizeParams {
-        name: MapSize::SMALL,
-        width: 30,
-        height: 20,
-        radius: 8,
-    };
+impl Default for MapSizeParams {
+    fn default() -> Self {
+        Self::new(MapSize::MEDIUM, 40, 30, 12)
+    }
+}
 
-    pub const MEDIUM: MapSizeParams = MapSizeParams {
-        name: MapSize::MEDIUM,
-        width: 40,
-        height: 30,
-        radius: 12,
-    };
+// Define the size constants as functions instead
+impl MapSizeParams {
+    pub fn tiny() -> Self {
+        Self::new(MapSize::TINY, 20, 15, 5)
+    }
 
-    pub const LARGE: MapSizeParams = MapSizeParams {
-        name: MapSize::LARGE,
-        width: 60,
-        height: 40,
-        radius: 18,
-    };
+    pub fn small() -> Self {
+        Self::new(MapSize::SMALL, 30, 20, 8)
+    }
 
-    pub const HUGE: MapSizeParams = MapSizeParams {
-        name: MapSize::HUGE,
-        width: 80,
-        height: 60,
-        radius: 25,
-    };
+    pub fn medium() -> Self {
+        Self::new(MapSize::MEDIUM, 40, 30, 12)
+    }
+
+    pub fn large() -> Self {
+        Self::new(MapSize::LARGE, 60, 40, 18)
+    }
+
+    pub fn huge() -> Self {
+        Self::new(MapSize::HUGE, 80, 60, 25)
+    }
 }
 
 /// Map parameters for map generation and configuration
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MapParameters {
     pub name: String,
     pub map_type: String,
@@ -150,7 +154,7 @@ impl MapParameters {
             name: String::new(),
             map_type: MapType::PANGAEA.to_string(),
             shape: MapShape::HEXAGONAL.to_string(),
-            map_size: MapSizeParams::MEDIUM,
+            map_size: MapSizeParams::medium(),
             map_resources: MapResourceSetting::DEFAULT.to_string(),
             mirroring: MirroringType::NONE.to_string(),
             no_ruins: false,
@@ -179,7 +183,32 @@ impl MapParameters {
 
     /// Creates a clone of this MapParameters
     pub fn clone(&self) -> Self {
-        self.clone()
+        Self {
+            name: self.name.clone(),
+            map_type: self.map_type.clone(),
+            shape: self.shape.clone(),
+            map_size: self.map_size.clone(),
+            map_resources: self.map_resources.clone(),
+            mirroring: self.mirroring.clone(),
+            no_ruins: self.no_ruins,
+            no_natural_wonders: self.no_natural_wonders,
+            world_wrap: self.world_wrap,
+            strategic_balance: self.strategic_balance,
+            legendary_start: self.legendary_start,
+            mods: self.mods.clone(),
+            base_ruleset: self.base_ruleset.clone(),
+            created_with_version: self.created_with_version.clone(),
+            seed: self.seed,
+            tiles_per_biome_area: self.tiles_per_biome_area,
+            max_coast_extension: self.max_coast_extension,
+            elevation_exponent: self.elevation_exponent,
+            temperature_intensity: self.temperature_intensity,
+            vegetation_richness: self.vegetation_richness,
+            rare_features_richness: self.rare_features_richness,
+            resource_richness: self.resource_richness,
+            water_threshold: self.water_threshold,
+            temperature_shift: self.temperature_shift,
+        }
     }
 
     /// Reseeds the map with a new random seed

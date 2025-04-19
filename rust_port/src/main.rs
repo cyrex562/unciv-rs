@@ -1,33 +1,84 @@
 // Main entry point for the Unciv Rust port
 
 mod ui;
+mod server;
+mod hex_math;
+mod map;
+mod automation;
+mod battle;
+mod city;
+mod civilization;
+mod event;
+mod github;
+mod json;
+mod logic;
+mod mapunit;
+mod media;
+mod metadata;
+mod models;
+mod multiplayer;
+mod ruleset;
+mod serializers;
+mod server;
+mod simulation;
+mod tile;
+mod trade;
+mod ui;
+mod utils;
+
+
+
 
 use eframe::egui;
 use log::info;
 use std::rc::Rc;
+use clap::Parser;
 
 use ui::{
     popups::{AskTextPopup, AuthPopup},
     screens::basescreen::BaseScreen,
 };
 
-fn main() -> Result<(), eframe::Error> {
-    // Initialize logging
-    env_logger::init();
-    info!("Starting Unciv Rust port");
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Run the multiplayer server instead of the game
+    #[arg(short, long)]
+    server: bool,
 
-    // Create the application
+    // ... existing arguments ...
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Initialize logger
+    env_logger::init();
+
+    // Parse command line arguments
+    let args = Args::parse();
+
+    // Check if server mode is requested
+    if args.server {
+        info!("Starting Unciv Server");
+        // Run server
+        let config = server::ServerConfig::parse();
+        tokio::runtime::Runtime::new()?.block_on(server::UncivServer::run(config))?;
+        return Ok(());
+    }
+
+    // Run game
+    info!("Starting Unciv Rust port");
     let options = eframe::NativeOptions {
-        initial_window_size: Some(egui::vec2(1024.0, 768.0)),
+        initial_window_size: Some(egui::vec2(1280.0, 720.0)),
         ..Default::default()
     };
 
-    // Run the application
     eframe::run_native(
         "Unciv Rust",
         options,
-        Box::new(|cc| Box::new(UncivApp::new(cc))),
-    )
+        Box::new(|_cc| Box::new(UncivApp::new())),
+    )?;
+
+    Ok(())
 }
 
 /// Main application struct
@@ -39,9 +90,9 @@ struct UncivApp {
 
 impl UncivApp {
     /// Create a new UncivApp
-    fn new(cc: &eframe::CreationContext<'_>) -> Self {
+    fn new() -> Self {
         // Create the base screen
-        let base_screen = Rc::new(BaseScreen::new(Rc::new(cc.egui_ctx.clone())));
+        let base_screen = Rc::new(BaseScreen::new(Rc::new(eframe::egui::Context::default())));
 
         Self {
             base_screen,

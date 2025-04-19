@@ -8,6 +8,7 @@ use std::sync::{Arc, Mutex};
 use std::cmp::Ordering;
 use directories::ProjectDirs;
 use path_clean::clean;
+use std::io;
 
 use crate::constants::Constants;
 use crate::unciv_game::UncivGame;
@@ -605,6 +606,39 @@ impl FileHandle {
         } else {
             FileType::Absolute
         }
+    }
+
+    /// Read the contents of the file
+    pub fn read_contents(&self) -> io::Result<Vec<u8>> {
+        fs::read(&self.path)
+    }
+
+    /// Write contents to the file
+    pub fn write_contents(&self, contents: &[u8]) -> io::Result<()> {
+        if let Some(parent) = self.path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::write(&self.path, contents)
+    }
+
+    /// List all files in a directory recursively
+    pub fn list_files(&self) -> io::Result<Vec<FileHandle>> {
+        if !self.is_directory() {
+            return Ok(Vec::new());
+        }
+
+        let mut files = Vec::new();
+        for entry in fs::read_dir(&self.path)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_file() {
+                files.push(FileHandle::from_path(path));
+            } else if path.is_dir() {
+                let mut subdir_files = FileHandle::from_path(path).list_files()?;
+                files.append(&mut subdir_files);
+            }
+        }
+        Ok(files)
     }
 }
 

@@ -1,13 +1,10 @@
 // Source: orig_src/core/src/com/unciv/logic/files/IMediaFinder.kt
 // Ported to Rust
 
-use std::path::{Path, PathBuf};
-use std::fs;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};
 use std::iter::FromIterator;
 use std::env;
-use lazy_static::lazy_static;
 
 // TODO: Replace these imports with the actual modules once they are created
 // For now, we'll use placeholder types
@@ -53,6 +50,24 @@ use crate::utils::file_chooser::FileHandle;
 /// - FileHandle.is_directory - won't work for internal folders when running a desktop jar
 ///   Doc: "On Android, an Files.FileType.Internal handle to an empty directory will return false. On the desktop, an Files.FileType.Internal handle to a directory on the classpath will return false."
 pub trait IMediaFinder: Send + Sync {
+    /// Get the names of all Unciv sounds
+    fn unciv_sound_names(&self) -> Vec<String> {
+        vec![
+            "notification1".to_string(),
+            "notification2".to_string(),
+            "coin".to_string(),
+            "construction".to_string(),
+            "paper".to_string(),
+            "policy".to_string(),
+            "setup".to_string(),
+            "swap".to_string(),
+            "whoosh".to_string(),
+            "nuke".to_string(),
+            "fire".to_string(),
+            "slider".to_string(),
+        ]
+    }
+
     /// Set of supported extensions **including the leading dot**.
     /// - use `setOf("")` if the [find_media] API should not guess extensions but require the name parameter to only match full names.
     /// - supplying "" ***and*** a list of extensions will make [find_media] accept both an explicit full name and have it guess extensions.
@@ -194,6 +209,11 @@ pub trait IMediaFinder: Send + Sync {
         cfg!(target_os = "windows") || cfg!(target_os = "linux") || cfg!(target_os = "macos")
     }
 
+    /// Get unit attack sounds
+    fn unit_attack_sounds(&self) -> Vec<(BaseUnit, String)> {
+        Vec::new()
+    }
+
     /// Get the supported audio extensions
     fn supported_audio_extensions() -> HashSet<String> {
         HashSet::from_iter(vec![
@@ -225,14 +245,6 @@ impl IMediaFinder for Sounds {
         "sounds".to_string()
     }
 
-    fn get_internal_media_names(&self, _folder: &FileHandle) -> Vec<String> {
-        let mut names = Vec::new();
-        names.extend(self.unciv_sound_names());
-        names.extend(self.unit_attack_sounds().iter().map(|(_, sound)| sound.clone()));
-        names
-    }
-
-    /// Get the names of all Unciv sounds
     fn unciv_sound_names(&self) -> Vec<String> {
         // In a real implementation, this would use reflection to get all UncivSound values
         // For now, we'll just return a hardcoded list
@@ -252,7 +264,6 @@ impl IMediaFinder for Sounds {
         ]
     }
 
-    /// Get the unit attack sounds from the vanilla ruleset
     fn unit_attack_sounds(&self) -> Vec<(BaseUnit, String)> {
         // TODO: Implement this once RulesetCache and BaseUnit are properly defined
         Vec::new()
@@ -324,7 +335,7 @@ impl LabeledSounds {
 
         let cache = self.cache.lock().unwrap();
         cache.iter()
-            .map(|(key, value)| (value.clone(), UncivSound::new(key.clone())))
+            .map(|(key, value)| (value.clone(), key.clone()))
             .collect()
     }
 
@@ -449,7 +460,7 @@ pub trait FileHandleExt {
 
 impl FileHandleExt for FileHandle {
     fn is_internal(&self) -> bool {
-        self.is_internal
+        FileHandle::is_internal(self)
     }
 
     fn name_without_extension(&self) -> String {

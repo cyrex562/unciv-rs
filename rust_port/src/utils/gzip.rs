@@ -7,27 +7,45 @@ use flate2::write::GzEncoder;
 use flate2::Compression;
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 
-/// Utility for compressing and decompressing strings using gzip
+/// Utility for compressing and decompressing data using GZIP
 pub struct Gzip;
 
 impl Gzip {
-    /// Compress a string using gzip and encode it in base64
-    pub fn zip(input: &str) -> io::Result<String> {
-        let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
-        encoder.write_all(input.as_bytes())?;
-        let compressed = encoder.finish()?;
-        Ok(BASE64.encode(compressed))
+    /// Compresses a string and encodes it as base64
+    pub fn zip(data: &str) -> String {
+        let compressed = Self::compress(data);
+        Self::encode(&compressed)
     }
 
-    /// Decode a base64 string and decompress it using gzip
-    pub fn unzip(input: &str) -> io::Result<String> {
-        let decoded = BASE64.decode(input)
-            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+    /// Decodes a base64 string and decompresses it
+    pub fn unzip(data: &str) -> String {
+        let decoded = Self::decode(data);
+        Self::decompress(&decoded)
+    }
 
-        let mut decoder = GzDecoder::new(&decoded[..]);
-        let mut decompressed = String::new();
-        decoder.read_to_string(&mut decompressed)?;
-        Ok(decompressed)
+    /// Compresses a string into a byte array
+    fn compress(data: &str) -> Vec<u8> {
+        let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
+        encoder.write_all(data.as_bytes()).unwrap();
+        encoder.finish().unwrap()
+    }
+
+    /// Decompresses a byte array into a string
+    fn decompress(compressed: &[u8]) -> String {
+        let mut decoder = GzDecoder::new(compressed);
+        let mut result = String::new();
+        decoder.read_to_string(&mut result).unwrap();
+        result
+    }
+
+    /// Encodes a byte array as base64
+    fn encode(bytes: &[u8]) -> String {
+        BASE64.encode(bytes)
+    }
+
+    /// Decodes a base64 string into a byte array
+    fn decode(base64_str: &str) -> Vec<u8> {
+        BASE64.decode(base64_str).unwrap_or_default()
     }
 }
 
@@ -38,8 +56,8 @@ mod tests {
     #[test]
     fn test_zip_unzip() {
         let original = "Test string for compression";
-        let compressed = Gzip::zip(original).unwrap();
-        let decompressed = Gzip::unzip(&compressed).unwrap();
+        let compressed = Gzip::zip(original);
+        let decompressed = Gzip::unzip(&compressed);
         assert_eq!(original, decompressed);
     }
 }

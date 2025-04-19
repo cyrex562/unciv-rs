@@ -1,6 +1,6 @@
 // Media module for handling game media files
 
-mod media_finder;
+pub mod media_finder;
 
 pub use media_finder::{
     IMediaFinder,
