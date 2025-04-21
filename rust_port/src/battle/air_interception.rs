@@ -148,7 +148,7 @@ impl AirInterception {
         let interceptor_name = interceptor.name.clone();
 
         let attacker_text = if attacker.is_defeated() {
-            if interceptor.get_tile() in attacker.get_civ_info().viewable_tiles {
+            if attacker.get_civ_info().viewable_tiles.contains(&interceptor.get_tile()) {
                 format!(
                     "Our [{}] ([-{}] HP) was destroyed by an intercepting [{}] ([-{}] HP)",
                     attacker_name, damage_dealt.defender_dealt, interceptor_name, damage_dealt.attacker_dealt
@@ -186,7 +186,7 @@ impl AirInterception {
                 interceptor_name, damage_dealt.attacker_dealt, attacker_name, damage_dealt.defender_dealt
             )
         } else if MapUnitCombatant::new(interceptor).is_defeated() {
-            if attacker.get_tile() in interceptor.civ.viewable_tiles {
+            if interceptor.civ.viewable_tiles.contains(&attacker.get_tile()) {
                 format!(
                     "Our [{}] ([-{}] HP) intercepted and was destroyed by an enemy [{}] ([-{}] HP)",
                     interceptor_name, damage_dealt.attacker_dealt, attacker_name, damage_dealt.defender_dealt
@@ -224,7 +224,7 @@ impl AirInterception {
             UniqueType::CannotBeIntercepted,
             StateForConditionals::new(
                 attacker.get_civ_info(),
-                our_combatant: attacker,
+                attacker,
                 their_combatant: defender,
                 attacked_tile: Some(attacked_tile)
             )
@@ -240,10 +240,10 @@ impl AirInterception {
                 // Can't intercept if we have a unique preventing it
                 let conditional_state = StateForConditionals::new(
                     intercepting_civ,
-                    our_combatant: MapUnitCombatant::new(unit),
-                    their_combatant: attacker,
-                    combat_action: Some(CombatAction::Intercept),
-                    attacked_tile: Some(attacked_tile)
+                    MapUnitCombatant::new(unit),
+                    attacker,
+                    Some(CombatAction::Intercept),
+                    Some(attacked_tile)
                 );
 
                 unit.get_matching_uniques(UniqueType::CannotInterceptUnits, conditional_state)

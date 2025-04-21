@@ -11,7 +11,6 @@ use std::thread;
 use std::time::Duration;
 
 use actix_web::{get, post, put, web, App, HttpResponse, HttpServer, Responder};
-use actix_web::http::header::Authorization;
 use actix_web::http::StatusCode;
 use actix_web::middleware::Logger;
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
@@ -74,15 +73,27 @@ impl UncivServer {
         env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
 
         // Create server state
-        let auth_map = Arc::new(HashMap::new());
+        let mut map = HashMap::new();
         let auth_enabled = config.auth_v1_enabled;
         let identify_operators = config.identify_operators;
         let folder = config.folder.clone();
 
         // Load auth file if enabled
         if auth_enabled {
-            Self::load_auth_file(&auth_map).await?;
+            let auth_file = Path::new("server.auth");
+            if !auth_file.exists() {
+                info!("No server.auth file found, creating one");
+                File::create(auth_file)?;
+            } else {
+                let content = fs::read_to_string(auth_file)?;
+                for line in content.lines() {
+                    if let Some((user_id, password)) = line.split_once(':') {
+                        map.insert(user_id.to_string(), password.to_string());
+                    }
+                }
+            }
         }
+        let auth_map = Arc::new(map);
 
         // Create server state
         let state = web::Data::new(ServerState {
@@ -120,22 +131,21 @@ impl UncivServer {
     }
 
     /// Load authentication file
-    async fn load_auth_file(auth_map: &Arc<HashMap<String, String>>) -> io::Result<()> {
+    async fn load_auth_file() -> io::Result<HashMap<String, String>> {
         let auth_file = Path::new("server.auth");
+        let mut map = HashMap::new();
         if !auth_file.exists() {
             info!("No server.auth file found, creating one");
             File::create(auth_file)?;
         } else {
             let content = fs::read_to_string(auth_file)?;
-            let mut map = HashMap::new();
             for line in content.lines() {
                 if let Some((user_id, password)) = line.split_once(':') {
                     map.insert(user_id.to_string(), password.to_string());
                 }
             }
-            *Arc::get_mut(auth_map).unwrap() = map;
         }
-        Ok(())
+        Ok(map)
     }
 
     /// Save authentication file
@@ -267,7 +277,7 @@ async fn put_file(
     }
 
     // Extract auth credentials
-    let auth_header = req.headers().get(Authorization::<String>())
+    let auth_header = req.headers().get("Authorization")
         .and_then(|h| h.to_str().ok());
     let auth_creds = UncivServer::extract_auth(auth_header, state.auth_enabled);
 
@@ -307,7 +317,7 @@ async fn auth_status(
 ) -> impl Responder {
     info!("Received auth request from {}", req.connection_info().peer_addr().unwrap_or("unknown"));
 
-    let auth_header = req.headers().get(Authorization::<String>())
+    let auth_header = req.headers().get("Authorization")
         .and_then(|h| h.to_str().ok());
     let auth_creds = UncivServer::extract_auth(auth_header, state.auth_enabled);
 
@@ -327,7 +337,7 @@ async fn put_auth(
 ) -> impl Responder {
     info!("Received auth password set from {}", req.connection_info().peer_addr().unwrap_or("unknown"));
 
-    let auth_header = req.headers().get(Authorization::<String>())
+    let auth_header = req.headers().get("Authorization")
         .and_then(|h| h.to_str().ok());
     let auth_creds = UncivServer::extract_auth(auth_header, state.auth_enabled);
 
@@ -338,7 +348,9 @@ async fn put_auth(
                 auth_map.insert(k.clone(), v.clone());
             }
             auth_map.insert(auth_creds.user_id, payload);
-            *Arc::get_mut(&state.auth_map).unwrap() = auth_map;
+            if let Some(map) = Arc::get_mut(&mut state.auth_map) {
+                *map = auth_map;
+            }
             HttpResponse::Ok().finish()
         } else {
             HttpResponse::BadRequest().finish()

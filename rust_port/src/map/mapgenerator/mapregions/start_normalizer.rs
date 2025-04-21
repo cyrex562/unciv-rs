@@ -1,16 +1,12 @@
 use std::collections::HashMap;
 use std::f32;
 use crate::constants::Constants;
-use crate::map::tile_map::TileMap;
 use crate::map::mapgenerator::resourceplacement::map_region_resources::MapRegionResources;
-use crate::map::tile::Tile;
+
 use crate::models::ruleset::Ruleset;
-use crate::models::ruleset::tile::ResourceType;
-use crate::models::ruleset::tile::TerrainType;
-use crate::models::ruleset::unique::StateForConditionals;
-use crate::models::ruleset::unique::UniqueType;
-use crate::models::stats::Stat;
 use crate::map::mapgenerator::mapregions::map_gen_tile_data::MapGenTileData;
+use crate::models::tile::Tile;
+use crate::models::tile_map::TileMap;
 
 /// Ensures that starting positions of civs have enough yield that they aren't at a disadvantage
 pub struct StartNormalizer;
