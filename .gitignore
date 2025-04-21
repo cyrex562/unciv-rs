@@ -1,22 +1,25 @@
-rust_port/target/**
-rust_port/Cargo.lock
-
-# Rust build artifacts
+# Rust Build Artifacts
 /target/
 **/*.rs.bk
 Cargo.lock
-
-# IDE specific files
-.idea/
-.vscode/
-*.swp
-*.swo
-.DS_Store
-
-# Debug files
+*.o
+*.so
+*.dylib
+*.dll
 *.pdb
 
-# Environment files
+# IDE and Editor Files
+.idea/
+.vscode/
+*.swo
+*.swp
+*~
+*.bak
+
+# Operating System Files
+.DS_Store
+
+# Configuration and Environment
 .env
 .env.local
 
@@ -24,13 +27,7 @@ Cargo.lock
 /doc/
 /docs/
 
-# Generated files
-*.o
-*.so
-*.dylib
-*.dll
-
-# Backup files
-*.bak
-*~
+# Project-specific paths
+rust_port/target/
+rust_port/Cargo.lock
 rust_port/target/.rustc_info.json
