@@ -4,7 +4,7 @@ use std::rc::Rc;
 use std::collections::HashMap;
 use egui::{Color32, Ui, Vec2, Response, Rect, Stroke, Align, RichText};
 use crate::models::civilization::Civilization;
-use crate::models::tile::Tile;
+use crate::tile::tile::Tile;
 use crate::models::tilemap::TileMap;
 use crate::ui::images::ImageGetter;
 use crate::utils::translation::tr;

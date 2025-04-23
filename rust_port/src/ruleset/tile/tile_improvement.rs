@@ -3,15 +3,16 @@ use serde::{Deserialize, Serialize};
 
 use crate::constants::REMOVE;
 use crate::models::ruleset::{
-    Belief, Ruleset, RulesetStatsObject, StateForConditionals, UniqueTarget, UniqueType,
+    Belief, Ruleset, RulesetStatsObject, StateForConditionals, UniqueTarget,
 };
 use crate::models::ruleset::unit::BaseUnit;
 use crate::models::ui::FormattedLine;
-use crate::utils::{MultiFilter, ImprovementDescriptions};
+use crate::utils::{ImprovementDescriptions, MultiFilter};
 use crate::models::ruleset::tile::{Terrain, TerrainType};
 use crate::models::civilization::Civilization;
 use crate::models::map::mapunit::MapUnit;
 use crate::models::map::tile::RoadStatus;
+use crate::unique_type::UniqueType;
 
 /// Represents a tile improvement in the game
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]

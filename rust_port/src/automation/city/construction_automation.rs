@@ -5,7 +5,7 @@ use std::f32;
 use crate::logic::city::CityConstructions;
 use crate::models::ruleset::{Building, BaseUnit, IConstruction, INonPerpetualConstruction, PerpetualConstruction};
 use crate::models::stats::{Stat, Stats};
-use crate::models::personality::PersonalityValue;
+use crate::ai::personality::PersonalityValue;
 
 /// Handles automated construction choices for cities
 pub struct ConstructionAutomation<'a> {

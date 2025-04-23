@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::constants::Constants;
 use crate::game::game_info::GameInfo;
 use crate::civilization::Civilization;
-use crate::civilization::diplomacy::DiplomacyFlags;
+use crate::diplomacy::DiplomacyFlags;
 use crate::models::ruleset::nation::PersonalityValue;
 use crate::trade::trade_offers_list::TradeOffersList;
 use crate::trade::trade_offer_type::TradeOfferType;

@@ -2,34 +2,8 @@ use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::fs;
 use std::path::Path;
-
-use crate::models::ruleset::{
-    belief::Belief,
-    building::Building,
-    difficulty::Difficulty,
-    era::Era,
-    event::Event,
-    global_uniques::GlobalUniques,
-    nation::Nation,
-    personality::Personality,
-    policy::Policy,
-    policy_branch::PolicyBranch,
-    ruin_reward::RuinReward,
-    quest::Quest,
-    specialist::Specialist,
-    technology::Technology,
-    tech_column::TechColumn,
-    terrain::Terrain,
-    tile_improvement::TileImprovement,
-    tile_resource::TileResource,
-    unit::BaseUnit,
-    unit_promotion::Promotion,
-    unit_type::UnitType,
-    victory::Victory,
-    city_state_type::CityStateType,
-    mod_options::ModOptions,
-    speed::Speed,
-};
+use nalgebra::DimAdd;
+use crate::models::ruleset::{belief::Belief, building::Building, difficulty::Difficulty, era::Era, event::Event, global_uniques::GlobalUniques, nation::Nation, personality::Personality, policy::Policy, policy_branch::PolicyBranch, ruin_reward::RuinReward, quest::Quest, specialist::Specialist, technology::Technology, tech_column::TechColumn, terrain::Terrain, tile_improvement::TileImprovement, tile_resource::TileResource, unit::BaseUnit, unit_promotion::Promotion, unit_type::UnitType, victory::Victory, city_state_type::CityStateType, mod_options::ModOptions, speed::Speed, Technology, UnitDefinitions, Difficulty};
 use crate::models::ruleset::unique::{Unique, UniqueType};
 use crate::models::stats::{GameResource, Stat, SubStat};
 use crate::models::ruleset::validation::RulesetValidator;
@@ -38,6 +12,30 @@ use crate::models::ruleset::unique::state_for_conditionals::StateForConditionals
 use crate::models::ruleset::tile::road_status::RoadStatus;
 use crate::models::ruleset::IRulesetObject;
 use crate::models::ICivilopediaText;
+use crate::ruleset::belief::Belief;
+use crate::ruleset::building::Building;
+use crate::ruleset::global_uniques::GlobalUniques;
+use crate::ruleset::mod_options::ModOptions;
+use crate::ruleset::nation::city_state_type::CityStateType;
+use crate::ruleset::nation::nation::Nation;
+use crate::ruleset::nation::personality::Personality;
+use crate::ruleset::policy_branch::PolicyBranch;
+use crate::ruleset::quest::Quest;
+use crate::ruleset::ruin_reward::RuinReward;
+use crate::ruleset::specialist::Specialist;
+use crate::ruleset::speed::Speed;
+use crate::ruleset::tech::era::Era;
+use crate::ruleset::tech::tech_column::TechColumn;
+use crate::ruleset::tech::technology::Technology;
+use crate::ruleset::tile::terrain::Terrain;
+use crate::ruleset::tile::tile_improvement::TileImprovement;
+use crate::ruleset::tile::tile_resource::TileResource;
+use crate::ruleset::unit::promotion::Promotion;
+use crate::ruleset::unit::unit_type::UnitType;
+use crate::ruleset::validation::ruleset_validator::RulesetValidator;
+use crate::ruleset::victory::Victory;
+use crate::stats::game_resource::GameResource;
+use crate::stats::sub_stat::SubStat;
 use crate::utils::constants::Constants;
 use crate::utils::json;
 use crate::utils::log::Log;
@@ -138,7 +136,7 @@ pub struct Ruleset {
     pub terrains: HashMap<String, Terrain>,
     pub tile_improvements: HashMap<String, TileImprovement>,
     pub tile_resources: HashMap<String, TileResource>,
-    pub units: HashMap<String, BaseUnit>,
+    pub unit_definitions: HashMap<String, BaseUnit>,
     pub unit_promotions: HashMap<String, Promotion>,
     pub unit_types: HashMap<String, UnitType>,
     pub victories: HashMap<String, Victory>,
@@ -146,6 +144,9 @@ pub struct Ruleset {
     pub personalities: HashMap<String, Personality>,
     pub events: HashMap<String, Event>,
     pub mod_options: ModOptions,
+    // pub technologies: HashMap<String, Technology>,
+    // pub units: UnitDefinitions,
+    // pub difficulties: HashMap<String, Difficulty>,
 }
 
 impl Ruleset {

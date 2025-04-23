@@ -7,7 +7,7 @@ use std::cmp::min;
 use rand::Rng;
 use crate::models::belief::{Belief, BeliefType};
 use crate::models::counter::Counter;
-use crate::models::tile::Tile;
+use crate::tile::tile::Tile;
 use std::collections::HashSet;
 
 /// Contains logic for automating religious decisions and actions

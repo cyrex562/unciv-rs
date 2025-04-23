@@ -1,7 +1,7 @@
 use crate::city::City;
 use crate::civilization::Civilization;
 use crate::civilization::proximity::Proximity;
-use crate::civilization::diplomacy::diplomacy_flags::DiplomacyFlags;
+use crate::diplomacy::flags::DiplomacyFlags;
 use crate::civilization::managers::religion_state::ReligionState;
 use crate::map::mapunit::MapUnit;
 use crate::models::ruleset::nation::Nation;

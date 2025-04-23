@@ -3,7 +3,7 @@ use regex::Regex;
 
 use crate::constants::Constants;
 use crate::city::CityConstructions;
-use crate::civilization::diplomacy::{DiplomacyFlags, DiplomacyManager};
+use crate::diplomacy::{DiplomacyFlags, DiplomacyManager};
 use crate::civilization::managers::TechManager;
 use crate::models::ruleset::{ModOptions, PerpetualConstruction, Ruleset};
 use crate::game_info::GameInfo;

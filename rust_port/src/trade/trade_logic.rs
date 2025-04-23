@@ -5,7 +5,7 @@ use crate::civilization::Civilization;
 use crate::city::City;
 use crate::models::ruleset::unique::UniqueType;
 use crate::models::ruleset::tile::ResourceType;
-use crate::civilization::diplomacy::{DiplomacyFlags, DeclareWarReason, WarType};
+use crate::diplomacy::{DiplomacyFlags, DeclareWarReason, WarType};
 use crate::civilization::AlertType;
 use crate::city::managers::SpyFleeReason;
 

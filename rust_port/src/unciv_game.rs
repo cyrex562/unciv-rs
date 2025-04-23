@@ -6,6 +6,9 @@ use std::io::Write;
 use std::fs::File;
 use uuid::Uuid;
 use lazy_static::lazy_static;
+use crate::game_info::GameInfo;
+use log::debug;
+use crate::game_settings::GameSettings;
 
 /// Represents the Unciv app itself:
 /// - implements the Game interface Gdx requires.
@@ -36,10 +39,7 @@ pub struct UncivGame {
     screen_stack: Mutex<VecDeque<Arc<dyn BaseScreen>>>,
 }
 
-/// Game settings that can be modified by the user
-pub struct GameSettings {
-    pub visual_mods: Vec<String>,
-}
+// GameSettings has been moved to src/game_settings.rs
 
 impl UncivGame {
     /// Creates a new UncivGame instance
@@ -757,22 +757,6 @@ impl BaseScreen for GameStartScreen {
     // Implementation would be provided elsewhere
 }
 
-// These are placeholder types that would be defined elsewhere in the codebase
-// They're included here to make the code compile and to show the expected structure
-
-pub struct GameInfo {
-    // Implementation details
-}
-
-pub struct GameSettings {
-    // Implementation details
-}
-
-impl Default for GameSettings {
-    fn default() -> Self {
-        Self {}
-    }
-}
 
 pub struct MusicController {
     // Implementation details
@@ -977,7 +961,7 @@ impl WorldScreen {
     }
 
     pub fn game_info(&self) -> Arc<GameInfo> {
-        Arc::new(GameInfo {})
+            Arc::new(GameInfo::new())
     }
 }
 

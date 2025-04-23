@@ -1,5 +1,5 @@
 use crate::civilization::{Civilization, NotificationCategory, NotificationIcon, PlayerType, Proximity};
-use crate::civilization::diplomacy::{CityStatePersonality, DiplomacyFlags, DiplomaticStatus};
+use crate::diplomacy::{CityStatePersonality, DiplomacyFlags, DiplomaticStatus};
 use crate::models::ruleset::{Quest, QuestName};
 use crate::models::ruleset::tile::{ResourceType, TileResource};
 use crate::models::ruleset::unit::BaseUnit;

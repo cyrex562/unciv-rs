@@ -4,7 +4,7 @@ use crate::city::city::City;
 use crate::civilization::civilization::Civilization;
 use crate::game_info::GameInfo;
 use crate::models::game_info::Position;
-use crate::models::tile::Tile;
+use crate::tile::tile::Tile;
 
 /// Represents a city and its distance from a tile
 #[derive(Debug, Clone)]

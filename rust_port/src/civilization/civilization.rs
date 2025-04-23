@@ -1,9 +1,6 @@
-use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
-use std::sync::Arc;
 use crate::city::city::City;
 use crate::civilization::civ_constructions::CivConstructions;
-use crate::civilization::diplomacy::diplomacy_manager::DiplomacyManager;
+use crate::diplomacy::manager::DiplomacyManager;
 use crate::civilization::managers::espionage_manager::EspionageManager;
 use crate::civilization::managers::great_person_manager::GreatPersonManager;
 use crate::civilization::managers::quest_manager::QuestManager;
@@ -13,13 +10,37 @@ use crate::civilization::managers::victory_manager::VictoryManager;
 use crate::civilization::transients::civ_info_stats_for_next_turn::CivInfoStatsForNextTurn;
 use crate::civilization::transients::civ_info_transient_cache::CivInfoTransientCache;
 use crate::game_info::GameInfo;
-use crate::models::civilization::{TechManager, ThreatManager};
-use crate::models::tile::Tile;
+use crate::models::civilization::{PopupAlert, TechManager, ThreatManager, UnitManager};
+use crate::models::map_unit::MapUnit;
+use crate::ai::personality::PersonalityValue;
+use crate::tile::tile::Tile;
+use crate::models::TradeRequest;
+use crate::ruleset::building::Building;
 use crate::ruleset::nation::nation::Nation;
+use crate::stats::stats::Stats;
+use crate::unique::state_for_conditionals::StateForConditionals;
+use crate::unique::UniqueType;
+use serde::{Deserialize, Serialize};
+use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
 
 /// Represents a civilization in the game
 #[derive(Serialize, Deserialize)]
 pub struct Civilization {
+    pub units: UnitManager,
+    // pub game_info: crate::models::game_info::GameInfo,
+    pub popup_alerts: Vec<PopupAlert>,
+    pub name: String,
+    pub is_barbarian: bool,
+    pub is_spectator: bool,
+    // pub is_city_state: bool,
+    pub personality: HashMap<PersonalityValue, f32>,
+    pub diplomacy_managers: HashMap<String, crate::models::DiplomacyManager>,
+    // pub threat_manager: ThreatManager,
+    // pub cities: Vec<crate::models::civilization::City>,
+    pub tech: TechManager,
+    pub trade_requests: Vec<TradeRequest>,
+
     /// Unique identifier for this civilization
     pub id: String,
 
@@ -242,6 +263,112 @@ impl Civilization {
         // TODO: Implement other sources of uniques
 
         uniques
+    }
+
+    /// Gets all units belonging to this civilization.
+    pub fn get_civ_units(&self) -> Vec<&MapUnit> {
+        self.units.get_civ_units()
+    }
+
+    /// Gets the personality value for the given personality type.
+    pub fn get_personality(&self) -> &HashMap<PersonalityValue, f32> {
+        &self.personality
+    }
+
+    /// Gets the diplomacy manager for the given civilization.
+    pub fn get_diplomacy_manager(
+        &self,
+        other_civ: &crate::models::civilization::Civilization,
+    ) -> Option<&crate::models::DiplomacyManager> {
+        self.diplomacy_managers.get(&other_civ.name)
+    }
+
+    /// Gets the diplomacy manager for the given civilization (mutable).
+    pub fn get_diplomacy_manager_mut(
+        &mut self,
+        other_civ: &crate::models::civilization::Civilization,
+    ) -> Option<&mut crate::models::DiplomacyManager> {
+        self.diplomacy_managers.get_mut(&other_civ.name)
+    }
+
+    /// Gets the stat for the given ranking type.
+    pub fn get_stat_for_ranking(&self, ranking_type: RankingType) -> f32 {
+        match ranking_type {
+            RankingType::Force => self.threat_manager.get_force(),
+            RankingType::Score => self.threat_manager.get_score(),
+            _ => 0.0, // Placeholder for other ranking types
+        }
+    }
+
+    /// Gets the capital city of this civilization.
+    pub fn get_capital(&self) -> Option<&crate::models::civilization::City> {
+        self.cities.iter().find(|city| city.is_capital)
+    }
+
+    /// Gets all civilizations this civilization is at war with.
+    pub fn get_civs_at_war_with(&self) -> Vec<&crate::models::civilization::Civilization> {
+        let mut war_civs = Vec::new();
+        for (civ_name, diplo_manager) in &self.diplomacy_managers {
+            if diplo_manager.get_diplomatic_status()
+                == crate::models::diplomacy::DiplomaticStatus::War
+            {
+                // This is a placeholder - in a real implementation, we would look up the civilization by name
+                // For now, we'll just return an empty vector
+            }
+        }
+        war_civs
+    }
+
+    /// Checks if this civilization is at war with the given civilization.
+    pub fn is_at_war_with(&self, other_civ: &crate::models::civilization::Civilization) -> bool {
+        if let Some(diplo_manager) = self.get_diplomacy_manager(other_civ) {
+            diplo_manager.get_diplomatic_status() == crate::models::diplomacy::DiplomaticStatus::War
+        } else {
+            false
+        }
+    }
+
+    /// Checks if this civilization is a major civilization.
+    pub fn is_major_civ(&self) -> bool {
+        !self.is_barbarian && !self.is_city_state && !self.is_spectator
+    }
+
+    /// Checks if this civilization has the given unique type.
+    pub fn has_unique(&self, unique_type: crate::unique_type::UniqueType) -> bool {
+        // Placeholder implementation
+        false
+    }
+
+    /// Checks if this civilization has explored the given tile.
+    pub fn has_explored(&self, tile: &crate::tile::tile::Tile) -> bool {
+        // Placeholder implementation
+        false
+    }
+
+    /// Adds a notification to this civilization.
+    pub fn add_notification(
+        &mut self,
+        message: String,
+        position: crate::models::game_info::Position,
+        category: crate::models::civilization::NotificationCategory,
+        icon: crate::models::civilization::NotificationIcon,
+    ) {
+        // Placeholder implementation
+    }
+
+    /// Sets the last seen improvement at the given position.
+    pub fn set_last_seen_improvement(
+        &mut self,
+        position: crate::models::game_info::Position,
+        improvement: String,
+    ) {
+        // Placeholder implementation
+    }
+
+    /// Checks if this civilization is defeated.
+    pub fn is_defeated(&self) -> bool {
+        // Placeholder implementation
+        false
     }
 }
 

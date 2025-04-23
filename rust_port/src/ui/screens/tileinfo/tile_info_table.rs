@@ -3,7 +3,7 @@
 use std::rc::Rc;
 use std::cell::RefCell;
 use egui::{Color32, Ui, Response, Rect, Vec2, RichText};
-use crate::models::tile::Tile;
+use crate::tile::tile::Tile;
 use crate::models::civilization::Civilization;
 use crate::models::stats::Stats;
 use crate::ui::images::ImageGetter;

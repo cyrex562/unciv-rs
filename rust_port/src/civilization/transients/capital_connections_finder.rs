@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 use std::sync::Arc;
 use crate::city::City;
 use crate::civilization::Civilization;
-use crate::civilization::diplomacy::DiplomaticStatus;
+use crate::diplomacy::DiplomaticStatus;
 use crate::map::bfs::BFS;
 use crate::map::tile::{RoadStatus, Tile};
 use crate::models::ruleset::unique::UniqueType;

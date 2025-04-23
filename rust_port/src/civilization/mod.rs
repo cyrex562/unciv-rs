@@ -1,4 +1,3 @@
-pub mod diplomacy;
 pub mod managers;
 pub mod transients;
 pub mod civ_constructions;

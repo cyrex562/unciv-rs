@@ -1,26 +1,43 @@
 use std::collections::{HashMap, HashSet};
 use std::time::{SystemTime, UNIX_EPOCH};
+use log::debug;
 use uuid::Uuid;
 use regex::Regex;
-
+use crate::barbarians::barbarian_manager::BarbarianManager;
 use crate::constants::Constants;
 use crate::city::City;
+use crate::city::city::City;
+use crate::city_distance::CityDistanceData;
 use crate::civilization::{Civilization, CivilizationInfoPreview, PlayerType};
 use crate::civilization::managers::{TechManager, TurnManager, VictoryManager};
 use crate::civilization::LocationAction;
+use crate::civilization::managers::turn_manager::TurnManager;
 use crate::civilization::MapUnitAction;
 use crate::civilization::Notification;
+use crate::civilization::notification::{Notification, NotificationCategory};
+use crate::civilization::notification_actions::MapUnitAction;
+use crate::civilization::notification_icons::NotificationIcon;
 use crate::civilization::NotificationCategory;
 use crate::civilization::NotificationIcon;
+use crate::game_info_preview::GameInfoPreview;
 use crate::logic::automation::civilization::BarbarianManager;
 use crate::logic::map::{CityDistanceData, MapShape, TileMap};
 use crate::logic::map::tile::Tile;
+use crate::map_parameters::MapShape;
+use crate::metadata::game_parameters::GameParameters;
 use crate::models::Religion;
 use crate::models::metadata::GameParameters;
 use crate::models::ruleset::{Ruleset, RulesetCache, Speed};
 use crate::models::ruleset::nation::Difficulty;
 use crate::models::ruleset::unique::{LocalUniqueCache, UniqueType};
+use crate::tile::tile::Tile;
+use crate::progress_bar::ProgressBar;
+use crate::religion::Religion;
+use crate::ruleset::speed::Speed;
+use crate::unique::unique::LocalUniqueCache;
+use crate::unique::UniqueType;
 use crate::utils::debug;
+use crate::victory_data::VictoryData;
 
 /// A trait for classes that are part of GameInfo serialization, i.e. save files.
 ///
@@ -75,90 +92,76 @@ impl CompatibilityVersion {
     }
 }
 
-/// Data about a victory in the game
-#[derive(Clone, Debug)]
-pub struct VictoryData {
-    /// The name of the winning civilization
-    pub winning_civ: String,
-    /// The type of victory achieved
-    pub victory_type: String,
-    /// The turn on which the victory was achieved
-    pub victory_turn: i32,
-}
+use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
+use crate::barbarians::barbarians::Barbarians;
+use crate::tile::tile::Tile;
+use crate::models::barbarians::Barbarians;
+use crate::models::civilization::Civilization;
+use crate::models::ruleset::Ruleset;
+use crate::models::map::Map;
+use crate::version::Version;
 
-impl VictoryData {
-    /// Create a new VictoryData
-    pub fn new(winning_civ: String, victory_type: String, victory_turn: i32) -> Self {
-        Self {
-            winning_civ,
-            victory_type,
-            victory_turn,
-        }
-    }
-
-    /// Default constructor for serialization
-    pub fn default() -> Self {
-        Self {
-            winning_civ: String::new(),
-            victory_type: String::new(),
-            victory_turn: 0,
-        }
-    }
-}
-
-/// The virtual world the users play in
+/// Contains game state information.
+/// The virtual world the users play in.
 pub struct GameInfo {
     /// The compatibility version of this game
-    pub version: CompatibilityVersion,
-
+    pub version: Version,
+    
     /// The civilizations in the game
     pub civilizations: Vec<Civilization>,
-
+    
     /// The barbarian manager
-    pub barbarians: BarbarianManager,
-
+    pub barbarians: Barbarians,
+    
+    /// The tile map of the game
+    pub tile_map: HashMap<Position, Tile>,
+    
+    /// The game map
+    pub map: Map,
+    
     /// The religions in the game
     pub religions: HashMap<String, Religion>,
-
+    
     /// The difficulty level of the game
     pub difficulty: String,
-
-    /// The tile map of the game
-    pub tile_map: TileMap,
-
+    
     /// The game parameters
     pub game_parameters: GameParameters,
-
+    
     /// The current turn number
     pub turns: i32,
-
+    
+    /// The speed of the game
+    pub speed: GameSpeed,
+    
     /// Whether the game is in one more turn mode
     pub one_more_turn_mode: bool,
-
+    
     /// The name of the current player
     pub current_player: String,
-
+    
     /// The time when the current turn started
     pub current_turn_start_time: i64,
-
+    
     /// The unique ID of the game
     pub game_id: String,
-
+    
     /// The checksum of the game
     pub checksum: String,
-
+    
     /// The ID of the last unit created
     pub last_unit_id: i32,
-
+    
     /// Data about the victory in the game
     pub victory_data: Option<VictoryData>,
-
+    
     /// Maps a civ to the civ they voted for - None on the value side means they abstained
     pub diplomatic_victory_votes_cast: HashMap<String, Option<String>>,
-
+    
     /// Set to false whenever the results still need to be processed
     pub diplomatic_victory_votes_processed: bool,
-
+    
     /// The turn the replay history started recording.
     ///
     /// * `-1` means the game was serialized with an older version without replay
@@ -166,39 +169,117 @@ pub struct GameInfo {
     ///   (remember game_parameters.starting_era is not implemented through turns starting > 0)
     /// * `>0` would be set by compatibility migration, handled in `BackwardCompatibility::migrate_to_tile_history`
     pub history_start_turn: i32,
-
+    
     /// Keep track of a custom location this game was saved to _or_ loaded from, using it as the default custom location for any further save/load attempts.
     pub custom_save_location: Option<String>,
-
+    
     // Transient fields (not serialized)
-
+    
     /// The difficulty object
     pub difficulty_object: Option<Difficulty>,
-
-    /// The speed of the game
-    pub speed: Option<Speed>,
-
+    
     /// The current player's civilization
     pub current_player_civ: Option<Civilization>,
-
+    
     /// Whether the game is up to date
     pub is_up_to_date: bool,
-
+    
     /// The ruleset of the game
-    pub ruleset: Option<Ruleset>,
-
+    pub ruleset: Arc<Ruleset>,
+    
     /// The maximum number of turns to simulate
     pub simulate_max_turns: i32,
-
+    
     /// Whether to simulate until a player wins
     pub simulate_until_win: bool,
-
+    
     /// The space resources
     pub space_resources: HashSet<String>,
-
+    
     /// The city distances
     pub city_distances: CityDistanceData,
 }
+
+/// Represents a position on the map.
+#[derive(Hash, Eq, PartialEq, Clone, Debug)]
+pub struct Position {
+    pub x: i32,
+    pub y: i32,
+}
+
+/// Game speed settings
+#[derive(Clone, Debug)]
+pub enum GameSpeed {
+    Quick,
+    Standard,
+    Epic,
+    Marathon,
+    Custom(f32),
+}
+
+impl GameInfo {
+    /// Creates a new GameInfo instance
+    pub fn new() -> Self {
+        Self {
+            version: Version::default(),
+            civilizations: Vec::new(),
+            barbarians: Barbarians::new(),
+            tile_map: HashMap::new(),
+            map: Map::default(),
+            religions: HashMap::new(),
+            difficulty: "Prince".to_string(),
+            game_parameters: GameParameters::default(),
+            turns: 0,
+            speed: GameSpeed::Standard,
+            one_more_turn_mode: false,
+            current_player: String::new(),
+            current_turn_start_time: 0,
+            game_id: String::new(),
+            checksum: String::new(),
+            last_unit_id: 0,
+            victory_data: None,
+            diplomatic_victory_votes_cast: HashMap::new(),
+            diplomatic_victory_votes_processed: true,
+            history_start_turn: 0,
+            custom_save_location: None,
+            difficulty_object: None,
+            current_player_civ: None,
+            is_up_to_date: true,
+            ruleset: Arc::new(Ruleset::default()),
+            simulate_max_turns: 0,
+            simulate_until_win: false,
+            space_resources: HashSet::new(),
+            city_distances: CityDistanceData::default(),
+        }
+    }
+    
+    /// Gets a tile at the specified position.
+    pub fn get_tile(&self, position: Position) -> Option<&Tile> {
+        self.tile_map.get(&position)
+    }
+    
+    /// Gets the player to view as
+    pub fn get_player_to_view_as(&self) -> String {
+        // Implementation would depend on game logic
+        self.current_player.clone()
+    }
+}
+
+// Placeholder struct definitions for compilation
+#[derive(Default)]
+pub struct Religion;
+
+#[derive(Default)]
+pub struct GameParameters;
+
+#[derive(Default)]
+pub struct VictoryData;
+
+#[derive(Default)]
+pub struct Difficulty;
+
+#[derive(Default)]
+pub struct CityDistanceData;
 
 impl GameInfo {
     /// The current compatibility version of GameInfo
@@ -1057,111 +1138,6 @@ impl GameInfo {
             self.game_parameters.base_ruleset = base_ruleset_in_mods.clone();
             self.game_parameters.mods.retain(|m| m != &base_ruleset_in_mods);
         }
-    }
-}
-
-/// A trait for progress bars
-pub trait ProgressBar {
-    /// Set the progress
-    fn set_progress(&mut self, progress: f32);
-
-    /// Set the text
-    fn set_text(&mut self, text: &str);
-}
-
-/// Version information
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Version {
-    /// The version string
-    pub version: &'static str,
-    /// The build number
-    pub build: i32,
-}
-
-impl Version {
-    /// Create a new Version
-    pub fn new(version: &'static str, build: i32) -> Self {
-        Self {
-            version,
-            build,
-        }
-    }
-
-    /// Default constructor
-    pub fn default() -> Self {
-        Self {
-            version: "",
-            build: 0,
-        }
-    }
-}
-
-/// Reduced variant of GameInfo used for load preview and multiplayer saves.
-/// Contains additional data for multiplayer settings.
-pub struct GameInfoPreview {
-    /// The civilizations in the game
-    pub civilizations: Vec<CivilizationInfoPreview>,
-
-    /// The difficulty level of the game
-    pub difficulty: String,
-
-    /// The game parameters
-    pub game_parameters: GameParameters,
-
-    /// The current turn number
-    pub turns: i32,
-
-    /// The unique ID of the game
-    pub game_id: String,
-
-    /// The name of the current player
-    pub current_player: String,
-
-    /// The time when the current turn started
-    pub current_turn_start_time: i64,
-}
-
-impl GameInfoPreview {
-    /// Create a new GameInfoPreview
-    pub fn new() -> Self {
-        Self {
-            civilizations: Vec::new(),
-            difficulty: "Chieftain".to_string(),
-            game_parameters: GameParameters::new(),
-            turns: 0,
-            game_id: String::new(),
-            current_player: String::new(),
-            current_turn_start_time: 0,
-        }
-    }
-
-    /// Create a new GameInfoPreview from a GameInfo
-    pub fn from_game_info(game_info: &GameInfo) -> Self {
-        let mut preview = Self::new();
-        preview.civilizations = game_info.get_civilizations_as_previews();
-        preview.difficulty = game_info.difficulty.clone();
-        preview.game_parameters = game_info.game_parameters.clone();
-        preview.turns = game_info.turns;
-        preview.game_id = game_info.game_id.clone();
-        preview.current_player = game_info.current_player.clone();
-        preview.current_turn_start_time = game_info.current_turn_start_time;
-
-        preview
-    }
-
-    /// Get a civilization by name
-    pub fn get_civilization(&self, civ_name: &str) -> Option<&CivilizationInfoPreview> {
-        self.civilizations.iter().find(|c| c.civ_name == civ_name)
-    }
-
-    /// Get the current player's civilization
-    pub fn get_current_player_civ(&self) -> Option<&CivilizationInfoPreview> {
-        self.get_civilization(&self.current_player)
-    }
-
-    /// Get a player's civilization by player ID
-    pub fn get_player_civ(&self, player_id: &str) -> Option<&CivilizationInfoPreview> {
-        self.civilizations.iter().find(|c| c.player_id == player_id)
     }
 }
 

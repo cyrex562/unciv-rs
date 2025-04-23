@@ -2,7 +2,7 @@ use crate::models::Counter;
 use crate::models::ruleset::Ruleset;
 use crate::models::ruleset::unique::{Unique, UniqueType};
 use crate::city::City;
-use crate::civilization::diplomacy::DiplomacyFlags;
+use crate::diplomacy::DiplomacyFlags;
 
 /// Manages calculating Great Person Points per City for nextTurn.
 pub struct GreatPersonPointsBreakdown<'a> {

@@ -1,5 +1,6 @@
 use std::sync::{Arc, Mutex};
 use std::option::Option;
+use crate::game_settings::GameSettings;
 
 /// Global interface for accessing the game's UI components and state
 pub struct GUI;

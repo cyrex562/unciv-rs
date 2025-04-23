@@ -4,7 +4,7 @@ use std::f64::EPSILON;
 
 use crate::constants::Constants;
 use crate::civilization::Civilization;
-use crate::civilization::diplomacy::{DiplomacyFlags, RelationshipLevel};
+use crate::diplomacy::{DiplomacyFlags, RelationshipLevel};
 use crate::city::City;
 use crate::game::game_info::GameInfo;
 use crate::map::tile::Tile;

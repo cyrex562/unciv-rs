@@ -3,9 +3,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::constants::ALL;
 use crate::models::ruleset::{
-    Belief, Ruleset, RulesetStatsObject, StateForConditionals, UniqueTarget, UniqueType,
+    Belief, Ruleset, RulesetStatsObject, StateForConditionals, UniqueTarget,
 };
 use crate::models::ui::{Color, FormattedLine};
+use crate::unique_type::UniqueType;
 use crate::utils::MultiFilter;
 
 /// Represents a terrain type in the game

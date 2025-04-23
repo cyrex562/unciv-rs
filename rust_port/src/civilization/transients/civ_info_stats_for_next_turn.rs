@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use crate::civilization::Civilization;
 use crate::civilization::PlayerType;
-use crate::civilization::diplomacy::RelationshipLevel;
+use crate::diplomacy::RelationshipLevel;
 use crate::map::tile::RoadStatus;
 use crate::models::ruleset::Policy;
 use crate::models::ruleset::tile::ResourceType;

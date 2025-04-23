@@ -4,11 +4,12 @@ use crate::models::battle::{BattleDamage, CityCombatant, MapUnitCombatant};
 use crate::models::city::City;
 use crate::models::civilization::Civilization;
 use crate::models::diplomacy::{DiplomacyFlags, DiplomacyManager, RelationshipLevel};
-use crate::models::map::{BFS, MapPathing};
-use crate::models::tile::Tile;
-use crate::models::ruleset::{Building, PersonalityValue, UniqueType};
+use crate::models::map::{MapPathing, BFS};
+use crate::tile::tile::Tile;
+use crate::models::ruleset::{Building, PersonalityValue};
 use crate::models::unit::BaseUnit;
 use crate::models::stats::RankingType;
+use crate::unique_type::UniqueType;
 
 /// Contains logic for evaluating the motivation of a civilization to attack another civilization.
 pub struct MotivationToAttackAutomation;

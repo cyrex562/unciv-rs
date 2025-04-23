@@ -1,15 +1,16 @@
 // Main entry point for the Unciv Rust port
 
-mod hex_math;
-mod map;
 mod automation;
 mod battle;
 mod city;
 mod civilization;
+mod constants;
 mod event;
 mod github;
+mod hex_math;
 mod json;
 mod logic;
+mod map;
 mod mapunit;
 mod media;
 mod metadata;
@@ -23,8 +24,6 @@ mod tile;
 mod trade;
 mod ui;
 mod utils;
-mod constants;
-
 
 mod backward_compatibility;
 
@@ -84,14 +83,31 @@ mod unciv_game;
 
 mod unciv_sound;
 
-mod unit_action;
 mod ranking_type;
+mod unique;
+mod unit_action;
+mod stats;
+mod units;
+mod systems;
+mod barbarians;
+pub mod diplomacy;
+mod progress_bar;
+mod game_info_preview;
+mod victory_data;
+mod game_settings;
+mod version;
+mod ai;
+mod difficulty;
 
+use ::log::info;
+use clap::Parser;
 use eframe::egui;
 use log::info;
 use std::rc::Rc;
-use clap::Parser;
 
+use crate::ui::popups::ask_text_popup::AskTextPopup;
+use crate::ui::popups::auth_popup::AuthPopup;
+use crate::ui::screens::base_screen::basescreen::BaseScreen;
 use ui::{
     popups::{AskTextPopup, AuthPopup},
     screens::basescreen::BaseScreen,
@@ -103,7 +119,6 @@ struct Args {
     /// Run the multiplayer server instead of the game
     #[arg(short, long)]
     server: bool,
-
     // ... existing arguments ...
 }
 
@@ -169,7 +184,10 @@ impl UncivApp {
     fn show_auth_popup(&mut self) {
         let screen = self.base_screen.clone();
         let auth_successful = Rc::new(|success: bool| {
-            info!("Authentication {}", if success { "successful" } else { "failed" });
+            info!(
+                "Authentication {}",
+                if success { "successful" } else { "failed" }
+            );
         });
 
         let popup = AuthPopup::new(screen, Some(auth_successful));
