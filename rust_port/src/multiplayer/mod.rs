@@ -14,3 +14,4 @@ pub mod request_structs;
 pub mod server_feature_set;
 pub mod unciv_network_exception;
 pub mod websocket_structs;
+pub mod friend_list;

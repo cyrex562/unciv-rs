@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::game::UncivGame;
 use crate::logic::id_checker::IdChecker;
-use crate::logic::multiplayer::friend_list::{FriendList, Friend, ErrorType};
+use crate::multiplayer::friend_list::{FriendList, Friend, ErrorType};
 use crate::ui::components::widgets::UncivTextField;
 use crate::ui::popups::ToastPopup;
 use crate::ui::screens::multiplayer::view_friends_list_screen::ViewFriendsListScreen;

@@ -1,208 +1,205 @@
 use std::collections::HashMap;
-use serde::{Serialize, Deserialize};
+use std::fs;
+use std::path::Path;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
-use crate::game::unciv_game::UncivGame;
+use crate::game::UncivGame;
+use crate::logic::id_checker::IdChecker;
+use crate::utils::translations::tr;
 
-/// Error types that can occur when managing friends
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum ErrorType {
-    /// No error occurred
-    NoError,
-    /// Error with the friend's name
-    Name,
-    /// Error with the friend's ID
-    Id,
-    /// Friend name is empty
-    NoName,
-    /// Friend ID is empty
-    NoId,
-    /// Cannot add yourself as a friend
-    Yourself,
-    /// Friend is already in the list
-    AlreadyInList,
-}
-
-/// A friend in the friend list
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+/// Represents a friend in the multiplayer system
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Friend {
-    /// The friend's display name
     pub name: String,
-    /// The friend's player ID
     pub player_id: String,
 }
 
-impl Friend {
-    /// Create a new friend with the given name and player ID
-    pub fn new(name: String, player_id: String) -> Self {
-        Self { name, player_id }
-    }
-
-    /// Create an empty friend
-    pub fn empty() -> Self {
-        Self {
-            name: String::new(),
-            player_id: String::new(),
-        }
-    }
+/// Error types for friend list operations
+#[derive(Debug, PartialEq)]
+pub enum ErrorType {
+    /// Friend name is already in the list
+    Name,
+    /// Player ID is already in the list
+    Id,
+    /// No name provided
+    NoName,
+    /// No ID provided
+    NoId,
+    /// Trying to add your own ID
+    Yourself,
+    /// Friend is already in the list
+    AlreadyInList,
+    /// Friend is not in the list
+    NotInList,
+    /// Operation successful
+    Success,
 }
 
-/// A list of friends for multiplayer functionality
+/// Manages the list of friends for multiplayer
 pub struct FriendList {
-    /// The list of friends
-    list_of_friends: Vec<Friend>,
+    friends: HashMap<String, Friend>,
+    file_path: String,
 }
 
 impl FriendList {
-    /// Create a new friend list
+    /// Create a new FriendList
     pub fn new() -> Self {
-        let settings = UncivGame::current().settings.clone();
-        Self {
-            list_of_friends: settings.multiplayer.friend_list.clone(),
+        let mut friend_list = Self {
+            friends: HashMap::new(),
+            file_path: String::new(),
+        };
+        friend_list.load();
+        friend_list
+    }
+
+    /// Load friends from file
+    fn load(&mut this) {
+        this.file_path = format!("{}/friends.json", UncivGame::current().settings.multiplayer.friends_directory);
+
+        if Path::new(&this.file_path).exists() {
+            match fs::read_to_string(&this.file_path) {
+                Ok(contents) => {
+                    match serde_json::from_str::<Vec<Friend>>(&contents) {
+                        Ok(friends) => {
+                            for friend in friends {
+                                this.friends.insert(friend.name.clone(), friend);
+                            }
+                        }
+                        Err(e) => eprintln!("Error parsing friends file: {}", e),
+                    }
+                }
+                Err(e) => eprintln!("Error reading friends file: {}", e),
+            }
+        }
+    }
+
+    /// Save friends to file
+    fn save(&this) {
+        let friends_vec: Vec<&Friend> = this.friends.values().collect();
+
+        match serde_json::to_string_pretty(&friends_vec) {
+            Ok(json) => {
+                if let Err(e) = fs::write(&this.file_path, json) {
+                    eprintln!("Error writing friends file: {}", e);
+                }
+            }
+            Err(e) => eprintln!("Error serializing friends: {}", e),
         }
     }
 
     /// Add a friend to the list
-    ///
-    /// # Parameters
-    ///
-    /// * `friend_name` - The name of the friend to add
-    /// * `player_id` - The player ID of the friend to add
-    ///
-    /// # Returns
-    ///
-    /// An error type indicating the result of the operation
-    pub fn add(&mut self, friend_name: &str, player_id: &str) -> ErrorType {
-        // Check if the friend name or ID already exists
-        for friend in &self.list_of_friends {
-            if friend.name == friend_name {
-                return ErrorType::Name;
-            } else if friend.player_id == player_id {
+    pub fn add(&mut this, name: String, player_id: String) -> ErrorType {
+        // Check if name is empty
+        if name.is_empty() {
+            return ErrorType::NoName;
+        }
+
+        // Check if player ID is empty
+        if player_id.is_empty() {
+            return ErrorType::NoId;
+        }
+
+        // Check if trying to add yourself
+        if player_id == UncivGame::current().settings.multiplayer.user_id {
+            return ErrorType::Yourself;
+        }
+
+        // Check if name is already in the list
+        if this.friends.contains_key(&name) {
+            return ErrorType::Name;
+        }
+
+        // Check if player ID is already in the list
+        for friend in this.friends.values() {
+            if friend.player_id == player_id {
                 return ErrorType::Id;
             }
         }
 
-        // Validate input
-        if friend_name.is_empty() {
-            return ErrorType::NoName;
-        } else if player_id.is_empty() {
-            return ErrorType::NoId;
-        } else if player_id == UncivGame::current().settings.multiplayer.user_id {
-            return ErrorType::Yourself;
-        }
-
         // Add the friend
-        self.list_of_friends.push(Friend::new(friend_name.to_string(), player_id.to_string()));
+        let friend = Friend {
+            name: name.clone(),
+            player_id,
+        };
 
-        // Save the settings
-        let mut settings = UncivGame::current().settings.clone();
-        settings.multiplayer.friend_list = self.list_of_friends.clone();
-        settings.save();
+        this.friends.insert(name, friend);
+        this.save();
 
-        ErrorType::NoError
+        ErrorType::Success
     }
 
     /// Edit a friend in the list
-    ///
-    /// # Parameters
-    ///
-    /// * `friend` - The friend to edit
-    /// * `name` - The new name for the friend
-    /// * `player_id` - The new player ID for the friend
-    pub fn edit(&mut self, friend: &Friend, name: &str, player_id: &str) {
+    pub fn edit(&mut this, friend: &Friend, new_name: String, new_player_id: String) -> ErrorType {
+        // Check if name is empty
+        if new_name.is_empty() {
+            return ErrorType::NoName;
+        }
+
+        // Check if player ID is empty
+        if new_player_id.is_empty() {
+            return ErrorType::NoId;
+        }
+
+        // Check if trying to add yourself
+        if new_player_id == UncivGame::current().settings.multiplayer.user_id {
+            return ErrorType::Yourself;
+        }
+
+        // Check if name is already in the list (and not the same friend)
+        if new_name != friend.name && this.friends.contains_key(&new_name) {
+            return ErrorType::Name;
+        }
+
+        // Check if player ID is already in the list (and not the same friend)
+        for existing_friend in this.friends.values() {
+            if existing_friend.player_id == new_player_id && existing_friend.name != friend.name {
+                return ErrorType::Id;
+            }
+        }
+
         // Remove the old friend
-        self.list_of_friends.retain(|f| f != friend);
+        this.friends.remove(&friend.name);
 
         // Add the edited friend
-        let edited_friend = Friend::new(name.to_string(), player_id.to_string());
-        self.list_of_friends.push(edited_friend);
+        let edited_friend = Friend {
+            name: new_name.clone(),
+            player_id: new_player_id,
+        };
 
-        // Save the settings
-        let mut settings = UncivGame::current().settings.clone();
-        settings.multiplayer.friend_list = self.list_of_friends.clone();
-        settings.save();
+        this.friends.insert(new_name, edited_friend);
+        this.save();
+
+        ErrorType::Success
     }
 
     /// Delete a friend from the list
-    ///
-    /// # Parameters
-    ///
-    /// * `friend` - The friend to delete
-    pub fn delete(&mut self, friend: &Friend) {
-        // Remove the friend
-        self.list_of_friends.retain(|f| f != friend);
-
-        // Save the settings
-        let mut settings = UncivGame::current().settings.clone();
-        settings.multiplayer.friend_list = self.list_of_friends.clone();
-        settings.save();
-    }
-
-    /// Get the list of friends
-    ///
-    /// # Returns
-    ///
-    /// A reference to the list of friends
-    pub fn get_friends_list(&self) -> &Vec<Friend> {
-        &self.list_of_friends
+    pub fn delete(&mut this, friend: &Friend) {
+        this.friends.remove(&friend.name);
+        this.save();
     }
 
     /// Check if a friend name is in the list
-    ///
-    /// # Parameters
-    ///
-    /// * `name` - The name to check
-    ///
-    /// # Returns
-    ///
-    /// An error type indicating the result of the check
-    pub fn is_friend_name_in_friend_list(&self, name: &str) -> ErrorType {
-        if self.list_of_friends.iter().any(|f| f.name == name) {
+    pub fn is_friend_name_in_friend_list(&this, name: &str) -> ErrorType {
+        if this.friends.contains_key(name) {
             ErrorType::AlreadyInList
         } else {
-            ErrorType::NoError
+            ErrorType::NotInList
         }
     }
 
-    /// Check if a friend ID is in the list
-    ///
-    /// # Parameters
-    ///
-    /// * `id` - The ID to check
-    ///
-    /// # Returns
-    ///
-    /// An error type indicating the result of the check
-    pub fn is_friend_id_in_friend_list(&self, id: &str) -> ErrorType {
-        if self.list_of_friends.iter().any(|f| f.player_id == id) {
-            ErrorType::AlreadyInList
-        } else {
-            ErrorType::NoError
+    /// Check if a player ID is in the list
+    pub fn is_friend_id_in_friend_list(&this, player_id: &str) -> ErrorType {
+        for friend in this.friends.values() {
+            if friend.player_id == player_id {
+                return ErrorType::AlreadyInList;
+            }
         }
+        ErrorType::NotInList
     }
 
-    /// Get a friend by ID
-    ///
-    /// # Parameters
-    ///
-    /// * `id` - The ID of the friend to get
-    ///
-    /// # Returns
-    ///
-    /// A reference to the friend, or None if not found
-    pub fn get_friend_by_id(&self, id: &str) -> Option<&Friend> {
-        self.list_of_friends.iter().find(|f| f.player_id == id)
-    }
-
-    /// Get a friend by name
-    ///
-    /// # Parameters
-    ///
-    /// * `name` - The name of the friend to get
-    ///
-    /// # Returns
-    ///
-    /// A reference to the friend, or None if not found
-    pub fn get_friend_by_name(&self, name: &str) -> Option<&Friend> {
-        self.list_of_friends.iter().find(|f| f.name == name)
+    /// Get the list of friends
+    pub fn get_friends_list(&this) -> Vec<Friend> {
+        this.friends.values().cloned().collect()
     }
 }

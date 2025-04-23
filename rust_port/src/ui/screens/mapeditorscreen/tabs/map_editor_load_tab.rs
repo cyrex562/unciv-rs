@@ -5,7 +5,7 @@ use std::sync::Arc;
 use crate::ui::components::*;
 use crate::ui::screens::basescreen::BaseScreen;
 use crate::ui::screens::mapeditorscreen::{MapEditorFilesTable, MapEditorScreen};
-use crate::logic::files::MapSaver;
+use crate::files::MapSaver;
 use crate::logic::{MissingModsException, UncivShowableException};
 use crate::models::ruleset::RulesetCache;
 use crate::utils::concurrency::Concurrency;

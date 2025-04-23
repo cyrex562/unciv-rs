@@ -7,6 +7,8 @@ use crate::models::civilization::Civilization;
 use crate::models::game_info::Position;
 use crate::models::ruleset::Ruleset;
 
+mod preview;
+
 /// Represents a game map with all its properties and functionality
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TileMap {

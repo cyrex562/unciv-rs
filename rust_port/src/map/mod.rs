@@ -8,6 +8,7 @@ pub mod unit;
 
 // Re-export for backward compatibility
 pub use unit::MapUnit;
-pub use unit_cache::MapUnitCache;
 pub mod mapgenerator;
 pub mod bfs;
+pub mod tile_map;
+pub mod map_saver;

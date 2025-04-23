@@ -98,6 +98,7 @@ mod game_settings;
 mod version;
 mod ai;
 mod difficulty;
+pub mod files;
 
 use ::log::info;
 use clap::Parser;

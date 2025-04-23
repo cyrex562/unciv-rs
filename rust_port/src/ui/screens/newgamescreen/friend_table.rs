@@ -1,7 +1,7 @@
 use egui::{Color32, Ui, Align};
 use egui_extras::Size;
 
-use crate::logic::multiplayer::friend_list::Friend;
+use crate::multiplayer::friend_list::Friend;
 use crate::ui::components::widgets::WrappableLabel;
 use crate::utils::constants::Constants;
 

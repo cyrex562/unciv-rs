@@ -13,7 +13,7 @@ use crate::ui::components::widgets::unciv_button::UncivButton;
 use crate::ui::components::widgets::unciv_label::UncivLabel;
 use crate::ui::components::extensions::*;
 use crate::ui::images::image_getter::ImageGetter;
-use crate::logic::files::map_saver::MapSaver;
+use crate::map::map_saver::MapSaver;
 use crate::models::ruleset::ruleset_cache::RulesetCache;
 use crate::utils::log::Log;
 

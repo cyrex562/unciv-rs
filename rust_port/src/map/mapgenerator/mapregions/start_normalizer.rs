@@ -5,7 +5,7 @@ use std::f32;
 use crate::map::mapgenerator::mapregions::map_gen_tile_data::MapGenTileData;
 use crate::models::ruleset::Ruleset;
 use crate::tile::tile::Tile;
-use crate::models::tile_map::TileMap;
+use crate::map::tile_map::TileMap;
 use crate::ruleset::tile::resource_type::ResourceType;
 use crate::ruleset::tile::terrain_type::TerrainType;
 use crate::ruleset::tile::tile_resource::TileResource;

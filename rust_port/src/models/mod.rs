@@ -13,7 +13,6 @@ pub mod skins;
 pub mod stats;
 pub mod tilesets;
 pub mod translations;
-pub mod tile_map;
 
 
 pub use barbarian_manager::BarbarianManager;

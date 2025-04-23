@@ -6,6 +6,7 @@ use crate::utils::gzip::Gzip;
 use crate::utils::file_chooser::FileHandle;
 use crate::map_parameters::MapParameters;
 use crate::logic::map::{self, AssignContinentsMode};
+use crate::map::tile_map::preview;
 
 /// Whether to save maps in zipped format
 pub static SAVE_ZIPPED: AtomicBool = AtomicBool::new(true);
@@ -69,7 +70,7 @@ impl MapSaver {
     }
 
     /// Load a map preview from a file
-    pub fn load_map_preview(map_file: &FileHandle) -> io::Result<map::Preview> {
+    pub fn load_map_preview(map_file: &FileHandle) -> io::Result<preview::Preview> {
         let contents = map_file.read_contents()?;
         let map_string = String::from_utf8(contents)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
@@ -77,7 +78,7 @@ impl MapSaver {
     }
 
     /// Convert a saved string to a map preview
-    fn map_preview_from_saved_string(map_string: &str) -> io::Result<map::Preview> {
+    fn map_preview_from_saved_string(map_string: &str) -> io::Result<preview::Preview> {
         let trimmed = map_string.trim();
         let json = Gzip::unzip(trimmed);
 

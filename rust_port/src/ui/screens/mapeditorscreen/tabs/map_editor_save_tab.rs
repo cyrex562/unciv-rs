@@ -15,7 +15,7 @@ use crate::ui::components::widgets::unciv_text_field::UncivTextField;
 use crate::ui::components::widgets::auto_scroll_pane::AutoScrollPane;
 use crate::ui::components::extensions::*;
 use crate::ui::popups::{toast_popup::ToastPopup, confirm_popup::ConfirmPopup, popup::Popup};
-use crate::logic::files::map_saver::MapSaver;
+use crate::map::map_saver::MapSaver;
 use crate::logic::map::map_generated_main_type::MapGeneratedMainType;
 use crate::logic::map::tile_map::TileMap;
 use crate::models::translations::tr;

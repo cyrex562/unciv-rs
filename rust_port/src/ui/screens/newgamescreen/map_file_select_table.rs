@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 use crate::game::UncivGame;
 use crate::logic::civilization::PlayerType;
-use crate::logic::files::MapSaver;
+use crate::files::MapSaver;
 use crate::logic::map::{MapParameters, TileMap};
 use crate::models::metadata::Player;
 use crate::models::ruleset::{Ruleset, RulesetCache};
