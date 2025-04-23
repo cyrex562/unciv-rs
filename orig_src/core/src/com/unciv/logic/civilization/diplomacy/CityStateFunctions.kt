@@ -299,7 +299,7 @@ class CityStateFunctions(val civInfo: Civilization) {
             )
             newAllyCiv.cache.updateViewableTiles()
             newAllyCiv.cache.updateCivResources()
-            for (unique in newAllyCiv.getMatchingUniques(UniqueType.CityStateCanBeBoughtForGold) + newAllyCiv.getMatchingUniques(UniqueType.CityStateCanBeBoughtForGoldOld))
+            for (unique in newAllyCiv.getMatchingUniques(UniqueType.CityStateCanBeBoughtForGold))
                 newAllyCiv.getDiplomacyManager(civInfo)!!.setFlag(DiplomacyFlags.MarriageCooldown, unique.params[0].toInt())
 
             // Join the wars of our new ally - loop through all civs they are at war with
@@ -365,7 +365,7 @@ class CityStateFunctions(val civInfo: Civilization) {
                 && civInfo.cities.any()
                 && civInfo.getDiplomacyManager(otherCiv)!!.isRelationshipLevelEQ(RelationshipLevel.Ally)
                 && !otherCiv.getDiplomacyManager(civInfo)!!.hasFlag(DiplomacyFlags.MarriageCooldown)
-                && (otherCiv.getMatchingUniques(UniqueType.CityStateCanBeBoughtForGold).any() || otherCiv.getMatchingUniques(UniqueType.CityStateCanBeBoughtForGoldOld).any())
+                && otherCiv.getMatchingUniques(UniqueType.CityStateCanBeBoughtForGold).any()
                 && otherCiv.gold >= getDiplomaticMarriageCost())
 
     }
@@ -549,12 +549,12 @@ class CityStateFunctions(val civInfo: Civilization) {
 
     fun getFreeTechForCityState() {
         // City-States automatically get all techs that at least half of the major civs know
-        val researchableTechs = civInfo.gameInfo.ruleset.technologies.keys
-            .filter { civInfo.tech.canBeResearched(it) }
+        val researchableTechs = civInfo.gameInfo.ruleset.technologies.values
+            .filter { !it.hasUnique(UniqueType.ResearchableMultipleTimes) && civInfo.tech.canBeResearched(it.name) }
         for (tech in researchableTechs) {
             val aliveMajorCivs = civInfo.gameInfo.getAliveMajorCivs()
-            if (aliveMajorCivs.count { it.tech.isResearched(tech) } >= aliveMajorCivs.size / 2)
-                civInfo.tech.addTechnology(tech)
+            if (aliveMajorCivs.count { it.tech.isResearched(tech.name) } >= aliveMajorCivs.size / 2)
+                civInfo.tech.addTechnology(tech.name)
         }
         return
     }
@@ -806,6 +806,7 @@ class CityStateFunctions(val civInfo: Civilization) {
                 getCityStateBonuses(it.cityStateType, relationshipLevel, uniqueType)
             }
             .filter { it.conditionalsApply(stateForConditionals) }
+            .flatMap { it.getMultiplied(stateForConditionals) }
     }
 
 
