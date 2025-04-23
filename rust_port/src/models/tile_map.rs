@@ -1,10 +1,10 @@
 use std::collections::{HashMap, HashSet};
 use serde::{Serialize, Deserialize};
+use crate::map_parameters::MapParameters;
 use crate::models::tile::Tile;
-use crate::models::position::Position;
-use crate::models::map_parameters::MapParameters;
 use crate::models::map_unit::MapUnit;
 use crate::models::civilization::Civilization;
+use crate::models::game_info::Position;
 use crate::models::ruleset::Ruleset;
 
 /// Represents a game map with all its properties and functionality

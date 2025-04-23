@@ -2,6 +2,7 @@ use std::collections::HashSet;
 use lazy_static::lazy_static;
 use crate::models::stats::stat::Stat;
 use crate::models::stats::stats::Stats;
+use crate::simulation::simulation::Stat;
 
 /// Controls automatic worker-to-tile assignment
 /// Order matters for building the CitizenManagementTable

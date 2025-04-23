@@ -18,6 +18,12 @@ pub enum MapResourceSetting {
 }
 
 impl MapResourceSetting {
+    pub(crate) fn from_str(p0: &String) -> MapResourceSetting {
+        todo!()
+    }
+}
+
+impl MapResourceSetting {
     /// Gets the label for this resource setting
     pub fn label(&self) -> &'static str {
         match self {

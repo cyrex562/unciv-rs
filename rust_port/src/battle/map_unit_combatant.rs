@@ -11,10 +11,18 @@ use std::sync::Arc;
 use std::fmt;
 
 /// Represents a map unit as a combatant in battle
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct MapUnitCombatant {
     /// The unit this combatant represents
     pub unit: Arc<MapUnit>,
+}
+
+impl std::fmt::Debug for MapUnitCombatant {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MapUnitCombatant")
+            .field("unit", &format!("Arc<MapUnit>({:p})", Arc::as_ptr(&self.unit)))
+            .finish()
+    }
 }
 
 impl MapUnitCombatant {

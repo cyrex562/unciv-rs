@@ -1,33 +1,21 @@
+use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use serde::{Serialize, Deserialize};
-
-use crate::models::gameinfo::GameInfo;
-use crate::models::ruleset::{Nation, Technology};
-use crate::models::stats::Stats;
+use crate::city::city::City;
+use crate::civilization::civ_constructions::CivConstructions;
+use crate::civilization::diplomacy::diplomacy_manager::DiplomacyManager;
+use crate::civilization::managers::espionage_manager::EspionageManager;
+use crate::civilization::managers::great_person_manager::GreatPersonManager;
+use crate::civilization::managers::quest_manager::QuestManager;
+use crate::civilization::managers::religion_manager::ReligionManager;
+use crate::civilization::managers::turn_manager::TurnManager;
+use crate::civilization::managers::victory_manager::VictoryManager;
+use crate::civilization::transients::civ_info_stats_for_next_turn::CivInfoStatsForNextTurn;
+use crate::civilization::transients::civ_info_transient_cache::CivInfoTransientCache;
+use crate::game_info::GameInfo;
+use crate::models::civilization::{TechManager, ThreatManager};
 use crate::models::tile::Tile;
-use crate::models::unique::UniqueType;
-use crate::city::City;
-use crate::civilization::managers::{
-    CivConstructions,
-    CityStateManager,
-    DiplomacyManager,
-    EspionageManager,
-    GoldManager,
-    GreatPersonManager,
-    NotificationManager,
-    QuestManager,
-    ReligionManager,
-    ScienceManager,
-    TechManager,
-    ThreatManager,
-    TurnManager,
-    VictoryManager,
-};
-use crate::civilization::transients::{
-    CivInfoStatsForNextTurn,
-    CivInfoTransientCache,
-};
+use crate::ruleset::nation::nation::Nation;
 
 /// Represents a civilization in the game
 #[derive(Serialize, Deserialize)]
@@ -104,6 +92,7 @@ pub struct Civilization {
     pub threat_manager: ThreatManager,
     pub turn_manager: TurnManager,
     pub victory_manager: VictoryManager,
+    pub civ_name: String,
 }
 
 impl Civilization {
@@ -151,12 +140,17 @@ impl Civilization {
 
         // Set up transients for all managers
         self.constructions.set_transients(Arc::new(self.clone()));
-        self.city_state_manager.set_transients(Arc::new(self.clone()));
-        self.diplomacy_manager.set_transients(Arc::new(self.clone()));
-        self.espionage_manager.set_transients(Arc::new(self.clone()));
+        self.city_state_manager
+            .set_transients(Arc::new(self.clone()));
+        self.diplomacy_manager
+            .set_transients(Arc::new(self.clone()));
+        self.espionage_manager
+            .set_transients(Arc::new(self.clone()));
         self.gold_manager.set_transients(Arc::new(self.clone()));
-        self.great_person_manager.set_transients(Arc::new(self.clone()));
-        self.notification_manager.set_transients(Arc::new(self.clone()));
+        self.great_person_manager
+            .set_transients(Arc::new(self.clone()));
+        self.notification_manager
+            .set_transients(Arc::new(self.clone()));
         self.quest_manager.set_transients(Arc::new(self.clone()));
         self.religion_manager.set_transients(Arc::new(self.clone()));
         self.science_manager.set_transients(Arc::new(self.clone()));
@@ -167,7 +161,9 @@ impl Civilization {
 
         // Set up transients for cities
         for city in &mut self.cities {
-            Arc::get_mut(city).unwrap().set_transients(Arc::new(self.clone()));
+            Arc::get_mut(city)
+                .unwrap()
+                .set_transients(Arc::new(self.clone()));
         }
 
         // Initialize transient cache
@@ -218,13 +214,20 @@ impl Civilization {
     /// Gets the equivalent building for this civilization
     pub fn get_equivalent_building(&self, building_name: &str) -> Arc<Building> {
         // TODO: Implement building equivalence lookup
-        self.game_info.ruleset.buildings.get(building_name)
+        self.game_info
+            .ruleset
+            .buildings
+            .get(building_name)
             .unwrap_or_else(|| panic!("Building {} not found", building_name))
             .clone()
     }
 
     /// Gets all matching uniques of a certain type
-    pub fn get_matching_uniques(&self, unique_type: UniqueType, state: StateForConditionals) -> Vec<Arc<Unique>> {
+    pub fn get_matching_uniques(
+        &self,
+        unique_type: UniqueType,
+        state: StateForConditionals,
+    ) -> Vec<Arc<Unique>> {
         let mut uniques = Vec::new();
 
         // Add uniques from nation
@@ -260,8 +263,8 @@ impl Clone for Civilization {
             is_ai: self.is_ai,
             is_city_state: self.is_city_state,
             capital: self.capital.clone(),
-            stats_for_next_turn: None,  // Don't clone transients
-            transient_cache: None,      // Don't clone transients
+            stats_for_next_turn: None, // Don't clone transients
+            transient_cache: None,     // Don't clone transients
             game_info: self.game_info.clone(),
             constructions: self.constructions.clone(),
             city_state_manager: self.city_state_manager.clone(),

@@ -1,9 +1,9 @@
+use crate::hex_math::HexMath;
+use crate::map::mapgenerator::map_resource_setting::MapResourceSetting;
+use crate::metadata::base_ruleset::BaseRuleset;
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::time::{SystemTime, UNIX_EPOCH};
-use serde::{Serialize, Deserialize};
-use crate::map::hex_math::HexMath;
-use crate::map::mapgenerator::map_resource_setting::MapResourceSetting;
-use crate::ruleset::base_ruleset::BaseRuleset;
 
 /// Map shape constants
 pub struct MapShape;
@@ -147,6 +147,37 @@ pub struct MapParameters {
     pub temperature_shift: f32,
 }
 
+impl Default for MapParameters {
+    fn default() -> Self {
+        Self {
+            name: String::new(),
+            map_type: MapType::PANGAEA.to_string(),
+            shape: MapShape::HEXAGONAL.to_string(),
+            map_size: MapSizeParams::default(),
+            map_resources: MapResourceSetting::Default.to_string(),
+            mirroring: MirroringType::NONE.to_string(),
+            no_ruins: false,
+            no_natural_wonders: false,
+            world_wrap: false,
+            strategic_balance: false,
+            legendary_start: false,
+            mods: HashSet::new(),
+            base_ruleset: BaseRuleset::CivVGnK.to_string(),
+            created_with_version: String::new(),
+            seed: 0,
+            tiles_per_biome_area: 6,
+            max_coast_extension: 2,
+            elevation_exponent: 0.7,
+            temperature_intensity: 0.6,
+            vegetation_richness: 0.4,
+            rare_features_richness: 0.05,
+            resource_richness: 0.1,
+            water_threshold: 0.0,
+            temperature_shift: 0.0,
+        }
+    }
+}
+
 impl MapParameters {
     /// Creates a new MapParameters with default values
     pub fn new() -> Self {
@@ -155,7 +186,7 @@ impl MapParameters {
             map_type: MapType::PANGAEA.to_string(),
             shape: MapShape::HEXAGONAL.to_string(),
             map_size: MapSizeParams::medium(),
-            map_resources: MapResourceSetting::DEFAULT.to_string(),
+            map_resources: MapResourceSetting::Default.to_string(),
             mirroring: MirroringType::NONE.to_string(),
             no_ruins: false,
             no_natural_wonders: false,
@@ -163,7 +194,7 @@ impl MapParameters {
             strategic_balance: false,
             legendary_start: false,
             mods: HashSet::new(),
-            base_ruleset: BaseRuleset::CIV_V_GNK.to_string(),
+            base_ruleset: BaseRuleset::CivVGnK.to_string(),
             created_with_version: String::new(),
             seed: SystemTime::now()
                 .duration_since(UNIX_EPOCH)
@@ -240,12 +271,13 @@ impl MapParameters {
 
     /// Gets whether strategic balance is enabled
     pub fn get_strategic_balance(&self) -> bool {
-        self.strategic_balance || self.map_resources == MapResourceSetting::STRATEGIC_BALANCE.to_string()
+        self.strategic_balance
+            || self.map_resources == MapResourceSetting::StrategicBalance.to_string()
     }
 
     /// Gets whether legendary start is enabled
     pub fn get_legendary_start(&self) -> bool {
-        self.legendary_start || self.map_resources == MapResourceSetting::LEGENDARY_START.to_string()
+        self.legendary_start || self.map_resources == MapResourceSetting::LegendaryStart.to_string()
     }
 
     /// Gets the area of the map
@@ -261,7 +293,8 @@ impl MapParameters {
 
     /// Displays the map dimensions
     fn display_map_dimensions(&self) -> String {
-        let dimensions = if self.shape == MapShape::HEXAGONAL || self.shape == MapShape::FLAT_EARTH {
+        let dimensions = if self.shape == MapShape::HEXAGONAL || self.shape == MapShape::FLAT_EARTH
+        {
             format!("R{}", self.map_size.radius)
         } else {
             format!("{}x{}", self.map_size.width, self.map_size.height)
@@ -277,7 +310,10 @@ impl MapParameters {
     /// Formats a float to a string with a maximum precision, removing trailing zeros
     fn nice_to_string(value: f32, max_precision: i32) -> String {
         let formatted = format!("{:.1$}", value, max_precision as usize);
-        formatted.trim_end_matches('0').trim_end_matches('.').to_string()
+        formatted
+            .trim_end_matches('0')
+            .trim_end_matches('.')
+            .to_string()
     }
 
     /// Gets the number of tiles in the map
@@ -311,8 +347,11 @@ impl ToString for MapParameters {
         result.push_str(&format!("{{{}}}", self.shape));
         result.push_str(&format!(" {} )", self.display_map_dimensions()));
 
-        if self.map_resources != MapResourceSetting::DEFAULT.to_string() {
-            result.push_str(&format!(" {{Resource Setting}}: {{{}}}", self.map_resources));
+        if self.map_resources != MapResourceSetting::Default.to_string() {
+            result.push_str(&format!(
+                " {{Resource Setting}}: {{{}}}",
+                self.map_resources
+            ));
         }
 
         if self.strategic_balance {
@@ -334,14 +373,38 @@ impl ToString for MapParameters {
         }
 
         result.push_str(&format!("{{RNG Seed}} {}", self.seed));
-        result.push_str(&format!(", {{Map Elevation}}={}", Self::nice_to_string(self.elevation_exponent, 2)));
-        result.push_str(&format!(", {{Temperature intensity}}={}", Self::nice_to_string(self.temperature_intensity, 2)));
-        result.push_str(&format!(", {{Resource richness}}={}", Self::nice_to_string(self.resource_richness, 3)));
-        result.push_str(&format!(", {{Vegetation richness}}={}", Self::nice_to_string(self.vegetation_richness, 2)));
-        result.push_str(&format!(", {{Rare features richness}}={}", Self::nice_to_string(self.rare_features_richness, 3)));
-        result.push_str(&format!(", {{Max Coast extension}}={}", self.max_coast_extension));
-        result.push_str(&format!(", {{Biome areas extension}}={}", self.tiles_per_biome_area));
-        result.push_str(&format!(", {{Water level}}={}", Self::nice_to_string(self.water_threshold, 2)));
+        result.push_str(&format!(
+            ", {{Map Elevation}}={}",
+            Self::nice_to_string(self.elevation_exponent, 2)
+        ));
+        result.push_str(&format!(
+            ", {{Temperature intensity}}={}",
+            Self::nice_to_string(self.temperature_intensity, 2)
+        ));
+        result.push_str(&format!(
+            ", {{Resource richness}}={}",
+            Self::nice_to_string(self.resource_richness, 3)
+        ));
+        result.push_str(&format!(
+            ", {{Vegetation richness}}={}",
+            Self::nice_to_string(self.vegetation_richness, 2)
+        ));
+        result.push_str(&format!(
+            ", {{Rare features richness}}={}",
+            Self::nice_to_string(self.rare_features_richness, 3)
+        ));
+        result.push_str(&format!(
+            ", {{Max Coast extension}}={}",
+            self.max_coast_extension
+        ));
+        result.push_str(&format!(
+            ", {{Biome areas extension}}={}",
+            self.tiles_per_biome_area
+        ));
+        result.push_str(&format!(
+            ", {{Water level}}={}",
+            Self::nice_to_string(self.water_threshold, 2)
+        ));
 
         result
     }

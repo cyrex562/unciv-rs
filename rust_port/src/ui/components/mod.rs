@@ -1,19 +1,17 @@
-// UI components module
-
-// Widgets module containing all UI widget implementations
-pub mod widgets;
-
-// Extensions and utilities
 pub mod extensions;
+pub mod fonts;
+pub mod input;
+pub mod map_arrow_type;
+pub mod maya_calendar;
+pub mod non_transform_group;
+pub mod particle_effect_animation;
+pub mod particle_effect_fireworks;
+pub mod particle_effect_map_fireworks;
+pub mod small_button_style;
+pub mod sortable_grid_content_provider;
+pub mod text_field;
 pub mod tilegroups;
 pub mod unciv_tooltip;
-pub mod non_transform_group;
-
-// Re-export commonly used components from widgets
-pub use widgets::text_field::TextField;
-pub use widgets::auto_scroll_pane::AutoScrollPane;
-pub use widgets::expander_tab::ExpanderTab;
-pub use widgets::tabbed_pager::TabbedPager;
-pub use widgets::unciv_slider::UncivSlider;
-pub use widgets::unciv_text_field::UncivTextField;
-pub use widgets::unit_icon_group::UnitIconGroup;
+pub mod widgets;
+pub mod year_text_util;
+pub mod zoom_gesture_listener;

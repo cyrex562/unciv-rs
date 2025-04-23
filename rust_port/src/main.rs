@@ -1,7 +1,5 @@
 // Main entry point for the Unciv Rust port
 
-mod ui;
-mod server;
 mod hex_math;
 mod map;
 mod automation;
@@ -25,9 +23,69 @@ mod tile;
 mod trade;
 mod ui;
 mod utils;
+mod constants;
 
 
+mod backward_compatibility;
 
+mod city_distance;
+
+mod collection_extensions;
+
+mod concurrency;
+
+mod counter;
+
+mod debug_utils;
+
+mod display;
+
+mod exceptions;
+
+mod game_info;
+
+mod game_starter;
+
+mod gui;
+
+mod holiday_dates;
+
+mod id_checker;
+
+mod log;
+
+mod map_parameters;
+
+mod map_pathing;
+
+mod map_size;
+
+mod mod_constants;
+
+mod multi_filter;
+
+mod music_track_controller;
+
+mod platform_specific;
+
+mod religion;
+
+mod sound_player;
+
+mod spy;
+
+mod translation_file_reader;
+
+mod translation_file_writer;
+
+mod translations;
+
+mod unciv_game;
+
+mod unciv_sound;
+
+mod unit_action;
+mod ranking_type;
 
 use eframe::egui;
 use log::info;

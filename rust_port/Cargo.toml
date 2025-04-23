@@ -24,6 +24,7 @@ regex = "1.10"
 walkdir = "2.4"
 directories = "5.0"
 path-clean = "1.0"
+ggez = "0.9.3"
 
 # Server dependencies
 actix-web = "4.4.0"

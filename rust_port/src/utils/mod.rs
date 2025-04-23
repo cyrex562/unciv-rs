@@ -3,7 +3,4 @@
 pub mod file_chooser;
 pub mod gzip;
 
-pub use file_chooser::FileHandle;
-pub use gzip::Gzip;
-
 pub mod simple_http;

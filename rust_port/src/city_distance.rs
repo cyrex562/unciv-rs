@@ -1,9 +1,10 @@
 use std::collections::HashMap;
-use crate::game::GameInfo;
-use crate::city::City;
-use crate::civilization::Civilization;
-use crate::map::tile::Tile;
-use crate::math::Vector2;
+use ggez::mint::Vector2;
+use crate::city::city::City;
+use crate::civilization::civilization::Civilization;
+use crate::game_info::GameInfo;
+use crate::models::game_info::Position;
+use crate::models::tile::Tile;
 
 /// Represents a city and its distance from a tile
 #[derive(Debug, Clone)]
@@ -93,7 +94,7 @@ impl CityDistanceData {
     }
 
     /// Updates the distance if the new distance is lower than the current one
-    fn update_distance_if_lower(&mut self, identifier: &str, position: Vector2, city: &City, distance: i32) {
+    fn update_distance_if_lower(&mut self, identifier: &str, position: Position, city: &City, distance: f32) {
         let entry = self.data.entry(identifier.to_string()).or_insert_with(HashMap::new);
         let current_distance = entry.get(&position).cloned().flatten();
         let new_distance = CityDistance {
@@ -107,12 +108,13 @@ impl CityDistanceData {
     fn update_distances(&mut self, this_tile: &Tile, city: &City, owner: &Civilization, is_major: bool) {
         let city_tile = city.get_center_tile();
         let distance = this_tile.aerial_distance_to(&city_tile);
+        let position = this_tile.position;
 
-        self.update_distance_if_lower(Self::IDENTIFIER_ALL_CIVS, this_tile.position, city, distance);
+        self.update_distance_if_lower(Self::IDENTIFIER_ALL_CIVS, position, city, distance);
 
         if is_major {
-            self.update_distance_if_lower(Self::IDENTIFIER_MAJOR_CIVS, this_tile.position, city, distance);
-            self.update_distance_if_lower(&owner.civ_name, this_tile.position, city, distance);
+            self.update_distance_if_lower(Self::IDENTIFIER_MAJOR_CIVS, position, city, distance);
+            self.update_distance_if_lower(&owner.civ_name, position, city, distance);
         }
     }
 

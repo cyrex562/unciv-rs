@@ -1,2 +1,0 @@
-std::iter::Cloned<std::collections::vec_deque::Iter<'_, models::barbarian_manager::Encampment>>
-core::iter::adapters::cloned::Cloned<alloc::collections::vec_deque::iter::Iter<'_, models::barbarian_manager::Encampment>>

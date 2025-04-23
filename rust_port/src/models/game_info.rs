@@ -9,7 +9,7 @@ pub struct GameInfo {
 }
 
 /// Represents a position on the map.
-#[derive(Hash, Eq, PartialEq, Clone)]
+#[derive(Hash, Eq, PartialEq, Clone, Debug)]
 pub struct Position {
     pub x: i32,
     pub y: i32,
