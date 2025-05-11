@@ -1,0 +1,11 @@
+/home/azrael/Projects/Unciv/rust_port/target/debug/deps/libcargo_metadata-f6ee1f8ee764ed6d.rmeta: /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/lib.rs /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/dependency.rs /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/diagnostic.rs /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/errors.rs /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/messages.rs
+
+/home/azrael/Projects/Unciv/rust_port/target/debug/deps/libcargo_metadata-f6ee1f8ee764ed6d.rlib: /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/lib.rs /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/dependency.rs /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/diagnostic.rs /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/errors.rs /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/messages.rs
+
+/home/azrael/Projects/Unciv/rust_port/target/debug/deps/cargo_metadata-f6ee1f8ee764ed6d.d: /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/lib.rs /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/dependency.rs /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/diagnostic.rs /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/errors.rs /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/messages.rs
+
+/home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/lib.rs:
+/home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/dependency.rs:
+/home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/diagnostic.rs:
+/home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/errors.rs:
+/home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_metadata-0.14.2/src/messages.rs:

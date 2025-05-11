@@ -1,0 +1,5 @@
+/home/azrael/Projects/Unciv/rust_port/target/debug/build/icu_normalizer_data-62b203d62685d497/build_script_build-62b203d62685d497: /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/icu_normalizer_data-1.5.1/build.rs
+
+/home/azrael/Projects/Unciv/rust_port/target/debug/build/icu_normalizer_data-62b203d62685d497/build_script_build-62b203d62685d497.d: /home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/icu_normalizer_data-1.5.1/build.rs
+
+/home/azrael/.cargo/registry/src/index.crates.io-6f17d22bba15001f/icu_normalizer_data-1.5.1/build.rs:

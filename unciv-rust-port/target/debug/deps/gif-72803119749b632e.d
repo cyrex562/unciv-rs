@@ -1,0 +1,12 @@
+/home/azrael/Projects/Unciv/rust_port/target/debug/deps/libgif-72803119749b632e.rmeta: /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/lib.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/traits.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/common.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/reader/mod.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/reader/decoder.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/reader/converter.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/encoder.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/../README.md
+
+/home/azrael/Projects/Unciv/rust_port/target/debug/deps/gif-72803119749b632e.d: /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/lib.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/traits.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/common.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/reader/mod.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/reader/decoder.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/reader/converter.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/encoder.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/../README.md
+
+/home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/lib.rs:
+/home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/traits.rs:
+/home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/common.rs:
+/home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/reader/mod.rs:
+/home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/reader/decoder.rs:
+/home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/reader/converter.rs:
+/home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/encoder.rs:
+/home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gif-0.13.1/src/../README.md:
