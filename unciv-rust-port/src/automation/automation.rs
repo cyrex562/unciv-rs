@@ -193,7 +193,7 @@ impl Automation {
                 yield_stats[stat] *= 2.0;
             }
 
-            let scaled_focus = civ_personality.scaled_focus(PersonalityValue[stat]);
+            let scaled_focus = civ_personality.scaled_focus(PersonalityValue::from_stat(stat));
             if scaled_focus != 1.0 {
                 yield_stats[stat] *= scaled_focus;
             }

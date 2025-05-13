@@ -1,19 +1,6 @@
 use std::collections::HashSet;
-use crate::models::civilization::diplomacy::DiplomaticModifiers;
-use crate::models::map::mapunit::MapUnit;
-use crate::models::map::tile::Tile;
-use crate::models::city::City;
-use crate::models::UnitActionType;
-use crate::models::ruleset::Building;
-use crate::models::ruleset::tile::TerrainType;
-use crate::models::ruleset::unique::UniqueType;
-use crate::models::stats::Stat;
-use crate::automation::Automation;
 use crate::automation::unit::civilian_unit_automation::CivilianUnitAutomation;
 use crate::automation::unit::city_location_tile_ranker::CityLocationTileRanker;
-use crate::battle::GreatGeneralImplementation;
-use crate::ui::screens::worldscreen::unit::actions::{UnitActions, UnitActionsFromUniques};
-use crate::models::ruleset::unique::LocalUniqueCache;
 
 /// Contains automation logic for specific unit types
 pub struct SpecificUnitAutomation;

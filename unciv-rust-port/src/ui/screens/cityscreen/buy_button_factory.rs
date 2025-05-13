@@ -1,23 +1,3 @@
-use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
-use std::collections::HashMap;
-
-use crate::constants::Constants;
-use crate::logic::city::CityConstructions;
-use crate::logic::map::tile::Tile;
-use crate::models::Religion;
-use crate::models::ruleset::{Building, IConstruction, INonPerpetualConstruction, PerpetualConstruction};
-use crate::models::ruleset::unique::UniqueType;
-use crate::models::stats::Stat;
-use crate::ui::audio::SoundPlayer;
-use crate::ui::components::UncivTooltip;
-use crate::ui::components::extensions::{disable, is_enabled, to_text_button};
-use crate::ui::components::input::{KeyboardBinding, on_activation};
-use crate::ui::popups::{Popup, close_all_popups};
-use crate::ui::screens::basescreen::BaseScreen;
-use crate::ui::screens::cityscreen::CityScreen;
-use crate::utils::translations::tr;
-
 /// This struct handles everything related to buying constructions. This includes
 /// showing and handling [ConfirmBuyPopup] and the actual purchase in [purchase_construction].
 pub struct BuyButtonFactory<'a> {

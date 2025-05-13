@@ -3,8 +3,15 @@ use std::cmp::max;
 use std::f32;
 
 
+use sdl2::sys::False;
+
 use crate::ai::personality::PersonalityValue;
 use crate::city::city_constructions::CityConstructions;
+use crate::ruleset::building::Building;
+use crate::ruleset::construction_new::Construction;
+use crate::ruleset::construction_new::ConstructionType;
+use crate::ruleset::construction_new::PerpetualConstruction;
+use crate::unique::unique::LocalUniqueCache;
 
 /// Handles automated construction choices for cities
 pub struct ConstructionAutomation<'a> {
@@ -56,18 +63,21 @@ impl<'a> ConstructionAutomation<'a> {
         }
     }
 
-    fn should_avoid_construction(&self, construction: &dyn IConstruction) -> bool {
+    fn should_avoid_construction(&self, construction: &Construction) -> bool {
         let state = self.city_constructions.get_city().get_state();
         for to_avoid in &self.constructions_to_avoid {
-            if let Some(building) = construction.as_any().downcast_ref::<Building>() {
-                if building.matches_filter(to_avoid, state) {
-                    return true;
-                }
-            }
-            if let Some(unit) = construction.as_any().downcast_ref::<BaseUnit>() {
-                if unit.matches_filter(to_avoid, state) {
-                    return true;
-                }
+            match &construction.construction_type {
+                ConstructionType::Building(building) => {
+                    if building.matches_filter(to_avoid, state) {
+                        return true;
+                    }
+                },
+                ConstructionType::Unit(unit) => {
+                    if unit.matches_filter(to_avoid, state) {
+                        return true;
+                    }
+                },
+                _ => {}, // Other construction types are not avoided
             }
         }
         false
@@ -173,10 +183,13 @@ impl<'a> ConstructionAutomation<'a> {
 
     // Building choices
     fn add_building_choices(&mut self) {
-        let local_unique_cache = LocalUniqueCache::new();
+        let local_unique_cache = LocalUniqueCache::new(False);
         let buildings = self.city_constructions.get_ruleset().buildings.values()
             .filter(|b| !self.disabled_auto_assign_constructions.contains(&b.name))
-            .filter(|b| !self.should_avoid_construction(*b));
+            .filter(|b| {
+                let construction = Construction::new_building(b);
+                !self.should_avoid_construction(&construction)
+            });
 
         for building in buildings.filter(|b| self.is_buildable(b)) {
             if building.is_wonder() && self.city_constructions.get_city().is_puppet() {
@@ -194,6 +207,11 @@ impl<'a> ConstructionAutomation<'a> {
                 self.get_value_of_building(building, &local_unique_cache)
             );
         }
+    }
+
+    // Check if a building is buildable
+    fn is_buildable(&self, building: &Building) -> bool {
+        building.is_buildable(self.city_constructions)
     }
 
     // Helper methods for calculating building value

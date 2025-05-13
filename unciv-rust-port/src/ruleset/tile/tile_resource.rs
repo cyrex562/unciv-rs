@@ -1,16 +1,7 @@
 use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
+use crate::ruleset::tile::resource_type::ResourceType;
 
-use crate::models::ruleset::{
-    Belief, Ruleset, RulesetStatsObject, StateForConditionals, UniqueTarget,
-};
-use crate::models::ruleset::tile::Terrain;
-use crate::models::civilization::Civilization;
-use crate::models::map::tile::Tile;
-use crate::models::stats::{GameResource, Stats};
-use crate::models::ui::FormattedLine;
-use crate::unique_type::UniqueType;
-use crate::utils::{uniques_to_civilopedia_text_lines, MultiFilter};
 
 /// Represents a deposit amount for a resource
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]

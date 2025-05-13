@@ -1,6 +1,7 @@
 // Update the import path to the correct module where Civilization is defined
 
-use crate::automation::unit::{BattleHelper, UnitAutomation};
+use crate::{automation::unit::{BattleHelper, UnitAutomation}, civilization::civilization::Civilization, map::MapUnit};
+use crate::constants::BARBARIAN_ENCAMPMENT;
 
 /// Handles automation of barbarian units in the game.
 pub struct BarbarianAutomation<'a> {
@@ -40,17 +41,22 @@ impl<'a> BarbarianAutomation<'a> {
     fn automate_unit(&self, unit: &MapUnit) {
         if unit.is_civilian() {
             self.automate_captured_civilian(unit);
-        } else if unit.current_tile.improvement == Constants::BARBARIAN_ENCAMPMENT {
-            self.automate_unit_on_encampment(unit);
         } else {
-            self.automate_combat_unit(unit);
+    match unit.current_tile.improvement == BARBARIAN_ENCAMPMENT {
+            true => {
+                self.automate_unit_on_encampment(unit);
+            }
+            false => {
+                    self.automate_combat_unit(unit);
+                }
         }
+}
     }
 
     /// Handles automation of captured civilian units.
-    fn automate_captured_civilian(&self, unit: &MapUnit) {
+    fn automate_captured_civilian(&self, unit: &mut MapUnit) {
         // 1. Stay on current encampment if already there
-        if unit.current_tile.improvement == Constants::BARBARIAN_ENCAMPMENT {
+        if unit.current_tile.improvement == BARBARIAN_ENCAMPMENT {
             return;
         }
 

@@ -1,13 +1,17 @@
-use crate::models::ruleset::tile::RoadStatus;
-use crate::models::Counter;
-use crate::models::ruleset::{Building, IConstruction, INonPerpetualConstruction};
-use crate::models::ruleset::unique::{LocalUniqueCache, Unique, UniqueTarget, UniqueType};
-use crate::models::ruleset::unit::BaseUnit;
-use crate::models::stats::{Stat, StatMap, Stats};
-use crate::city::City;
-use crate::utils::DebugUtils;
 use std::collections::HashMap;
 use std::cmp::min;
+
+use crate::counter::Counter;
+use crate::debug_utils::DebugUtils;
+use crate::simulation::simulation::Stat;
+use crate::stats::stats::{StatMap, Stats};
+use crate::tile::tile::RoadStatus;
+use crate::unique::unique::{LocalUniqueCache, Unique};
+use crate::unique::unique_target::UniqueTarget;
+use crate::unique::UniqueType;
+use crate::ruleset::construction_new::{Construction, ConstructionType};
+
+use super::city::City;
 
 /// A tree structure for organizing statistics by source
 pub struct StatTreeNode {
@@ -91,7 +95,7 @@ impl StatTreeNode {
 /// No field needs to be saved, all are calculated on the fly,
 /// so its field in City is transient and no such annotation is needed here.
 pub struct CityStats<'a> {
-    city: &'a City,
+    city: &'a City<'a>,
     base_stat_tree: StatTreeNode,
     stat_percent_bonus_tree: StatTreeNode,
     final_stat_list: HashMap<String, Stats>,
@@ -117,16 +121,16 @@ impl<'a> CityStats<'a> {
         let mut stats = Stats::new();
         let capital_for_trade_route_purposes = self.city.civ.get_capital().unwrap();
 
-        if self.city != capital_for_trade_route_purposes && self.city.is_connected_to_capital() {
+        if self.city != capital_for_trade_route_purposes && self.city.is_connected_to_capital(RoadStatus::Road) {
             stats.gold = capital_for_trade_route_purposes.population.population as f32 * 0.15
                 + self.city.population.population as f32 * 1.1 - 1.0; // Calculated by http://civilization.wikia.com/wiki/Trade_route_(Civ5)
 
-            for unique in self.city.get_matching_uniques(UniqueType::StatsFromTradeRoute, &self.city.state) {
+            for unique in self.city.get_matching_uniques(UniqueType::StatsFromTradeRoute, Some(&self.city.state), true) {
                 stats.add(&unique.stats);
             }
 
             let mut percentage_stats = Stats::new();
-            for unique in self.city.get_matching_uniques(UniqueType::StatPercentFromTradeRoutes, &self.city.state) {
+            for unique in self.city.get_matching_uniques(UniqueType::StatPercentFromTradeRoutes, Some(&self.city.state), true) {
                 let stat = Stat::from_str(&unique.params[1]).unwrap();
                 percentage_stats.set(stat, percentage_stats.get(stat) + unique.params[0].parse::<f32>().unwrap_or(0.0));
             }
@@ -174,11 +178,11 @@ impl<'a> CityStats<'a> {
         {
             stats.production += 25.0;
         }
-        Some(stats)
+        stats
     }
 
     fn add_stat_percent_bonuses_from_buildings(&self, stat_percent_bonus_tree: &mut StatTreeNode) {
-        let local_unique_cache = LocalUniqueCache::new();
+        let local_unique_cache = LocalUniqueCache::new(true);
         for building in self.city.city_constructions.get_built_buildings() {
             stat_percent_bonus_tree.add_stats(
                 building.get_stat_percentage_bonuses(self.city, &local_unique_cache),
@@ -201,8 +205,8 @@ impl<'a> CityStats<'a> {
         let state_for_conditionals = &self.city.state;
 
         // "[amount]% growth [cityFilter]"
-        for unique in self.city.get_matching_uniques(UniqueType::GrowthPercentBonus, state_for_conditionals) {
-            if !self.city.matches_filter(&unique.params[1]) {
+        for unique in self.city.get_matching_uniques(UniqueType::GrowthPercentBonus, Some(state_for_conditionals), true) {
+            if !self.city.matches_filter(&unique.params[1], None, false) {
                 continue;
             }
 
@@ -218,7 +222,7 @@ impl<'a> CityStats<'a> {
         if self.city.civ.civ_name == self.city.founding_civ || self.city.is_puppet {
             return false;
         }
-        !self.city.contains_building_unique(UniqueType::RemoveAnnexUnhappiness)
+        !self.city.contains_building_unique(UniqueType::RemoveAnnexUnhappiness, None)
     }
 
     pub fn get_stats_of_specialist(&self, specialist_name: &str, local_unique_cache: &LocalUniqueCache) -> Stats {
@@ -229,13 +233,13 @@ impl<'a> CityStats<'a> {
 
         let mut stats = specialist.clone_stats();
 
-        for unique in local_unique_cache.for_city_get_matching_uniques(self.city, UniqueType::StatsFromSpecialist) {
-            if self.city.matches_filter(&unique.params[1]) {
+        for unique in local_unique_cache.for_city_get_matching_uniques(self.city, UniqueType::StatsFromSpecialist, &self.city.state) {
+            if self.city.matches_filter(&unique.params[1], None, false) {
                 stats.add(&unique.stats);
             }
         }
 
-        for unique in local_unique_cache.for_city_get_matching_uniques(self.city, UniqueType::StatsFromObject) {
+        for unique in local_unique_cache.for_city_get_matching_uniques(self.city, UniqueType::StatsFromObject, &self.city.state) {
             if unique.params[1] == specialist_name {
                 stats.add(&unique.stats);
             }
@@ -246,7 +250,7 @@ impl<'a> CityStats<'a> {
 
     fn get_stats_from_specialists(&self, specialists: &Counter<String>) -> Stats {
         let mut stats = Stats::new();
-        let local_unique_cache = LocalUniqueCache::new();
+        let local_unique_cache = LocalUniqueCache::new(true);
 
         for (key, value) in specialists.iter().filter(|(_, v)| *v > 0) {
             stats.add(&(self.get_stats_of_specialist(key, &local_unique_cache) * *value as f32));
@@ -271,16 +275,16 @@ impl<'a> CityStats<'a> {
             source_to_stats.add_stats(stats, &[unique.get_source_name_for_user(), unique.source_object_name.clone().unwrap_or_default()]);
         };
 
-        for unique in self.city.get_matching_uniques(UniqueType::StatsPerCity, &self.city.state) {
-            if self.city.matches_filter(&unique.params[1]) {
+        for unique in self.city.get_matching_uniques(UniqueType::StatsPerCity, Some(&self.city.state), true) {
+            if self.city.matches_filter(&unique.params[1], None, false) {
                 add_unique_stats(unique);
             }
         }
 
         // "[stats] per [amount] population [cityFilter]"
-        for unique in self.city.get_matching_uniques(UniqueType::StatsPerPopulation, &self.city.state) {
-            if self.city.matches_filter(&unique.params[2]) {
-                let amount_of_effects = (self.city.population.population as f32 / unique.params[1].parse::<f32>().unwrap_or(1.0));
+        for unique in self.city.get_matching_uniques(UniqueType::StatsPerPopulation, Some(&self.city.state), true) {
+            if self.city.matches_filter(&unique.params[2], None, false) {
+                let amount_of_effects = self.city.population.population as f32 / unique.params[1].parse::<f32>().unwrap_or(1.0);
                 source_to_stats.add_stats(
                     unique.stats.times(amount_of_effects),
                     &[unique.get_source_name_for_user(), unique.source_object_name.clone().unwrap_or_default()]
@@ -288,7 +292,7 @@ impl<'a> CityStats<'a> {
             }
         }
 
-        for unique in self.city.get_matching_uniques(UniqueType::StatsFromCitiesOnSpecificTiles, &self.city.state) {
+        for unique in self.city.get_matching_uniques(UniqueType::StatsFromCitiesOnSpecificTiles, Some(&self.city.state), true) {
             if self.city.get_center_tile().matches_terrain_filter(&unique.params[1], &self.city.civ) {
                 add_unique_stats(unique);
             }
@@ -306,7 +310,7 @@ impl<'a> CityStats<'a> {
         stats
     }
 
-    fn get_stats_percent_bonuses_from_uniques_by_source(&self, current_construction: &dyn IConstruction) -> StatTreeNode {
+    fn get_stats_percent_bonuses_from_uniques_by_source(&self, current_construction: &Construction) -> StatTreeNode {
         let mut source_to_stats = StatTreeNode::new();
 
         let add_unique_stats = |unique: &Unique, stat: Stat, amount: f32| {
@@ -316,39 +320,42 @@ impl<'a> CityStats<'a> {
             );
         };
 
-        for unique in self.city.get_matching_uniques(UniqueType::StatPercentBonus, &self.city.state) {
+
+
+        for unique in self.city.get_matching_uniques(UniqueType::StatPercentBonus, Some(&self.city.state), true) {
             if let Ok(stat) = Stat::from_str(&unique.params[1]) {
                 add_unique_stats(unique, stat, unique.params[0].parse::<f32>().unwrap_or(0.0));
             }
         }
 
-        for unique in self.city.get_matching_uniques(UniqueType::StatPercentBonusCities, &self.city.state) {
-            if self.city.matches_filter(&unique.params[2]) {
+        for unique in self.city.get_matching_uniques(UniqueType::StatPercentBonusCities, Some(&self.city.state), true) {
+            if self.city.matches_filter(&unique.params[2], None, false) {
                 if let Ok(stat) = Stat::from_str(&unique.params[1]) {
                     add_unique_stats(unique, stat, unique.params[0].parse::<f32>().unwrap_or(0.0));
                 }
             }
         }
 
-        let uniques_to_check = match current_construction {
-            _ if current_construction.is_base_unit() =>
-                self.city.get_matching_uniques(UniqueType::PercentProductionUnits, &self.city.state),
-            _ if current_construction.is_building() && current_construction.is_any_wonder() =>
-                self.city.get_matching_uniques(UniqueType::PercentProductionWonders, &self.city.state),
-            _ if current_construction.is_building() && !current_construction.is_any_wonder() =>
-                self.city.get_matching_uniques(UniqueType::PercentProductionBuildings, &self.city.state),
-            _ => Vec::new(), // Science/Gold production
+        // Determine which uniques to check based on construction type
+        let uniques_to_check = match &current_construction.construction_type {
+            crate::ruleset::construction_new::ConstructionType::Unit(_) =>
+                self.city.get_matching_uniques(UniqueType::PercentProductionUnits, Some(&self.city.state), true),
+            crate::ruleset::construction_new::ConstructionType::Building(building) if building.is_wonder =>
+                self.city.get_matching_uniques(UniqueType::PercentProductionWonders, Some(&self.city.state), true),
+            crate::ruleset::construction_new::ConstructionType::Building(_) =>
+                self.city.get_matching_uniques(UniqueType::PercentProductionBuildings, Some(&self.city.state), true),
+            _ => Vec::new(), // Science/Gold production or other types
         };
 
         for unique in uniques_to_check {
             if self.construction_matches_filter(current_construction, &unique.params[1])
-                && self.city.matches_filter(&unique.params[2])
+                && self.city.matches_filter(&unique.params[2], None, false)
             {
                 add_unique_stats(unique, Stat::Production, unique.params[0].parse::<f32>().unwrap_or(0.0));
             }
         }
 
-        for unique in self.city.get_matching_uniques(UniqueType::StatPercentFromReligionFollowers, &self.city.state) {
+        for unique in self.city.get_matching_uniques(UniqueType::StatPercentFromReligionFollowers, Some(&self.city.state), true) {
             if let Ok(stat) = Stat::from_str(&unique.params[1]) {
                 add_unique_stats(
                     unique,
@@ -361,12 +368,14 @@ impl<'a> CityStats<'a> {
             }
         }
 
-        if current_construction.is_building()
-            && self.city.civ.get_capital().map_or(false, |cap|
+        // Check if this is a building construction and if it's built in the capital
+        if let ConstructionType::Building(_) = &current_construction.construction_type {
+            if self.city.civ.get_capital().map_or(false, |cap|
                 cap.city_constructions.is_built(current_construction.name()))
-        {
-            for unique in self.city.get_matching_uniques(UniqueType::PercentProductionBuildingsInCapital, &self.city.state) {
-                add_unique_stats(unique, Stat::Production, unique.params[0].parse::<f32>().unwrap_or(0.0));
+            {
+                for unique in self.city.get_matching_uniques(UniqueType::PercentProductionBuildingsInCapital, Some(&self.city.state), true) {
+                    add_unique_stats(unique, Stat::Production, unique.params[0].parse::<f32>().unwrap_or(0.0));
+                }
             }
         }
 
@@ -382,14 +391,12 @@ impl<'a> CityStats<'a> {
         stats
     }
 
-    fn construction_matches_filter(&self, construction: &dyn IConstruction, filter: &str) -> bool {
+    fn construction_matches_filter(&self, construction: &Construction, filter: &str) -> bool {
         let state = &self.city.state;
-        if construction.is_building() {
-            construction.matches_filter(filter, state)
-        } else if construction.is_base_unit() {
-            construction.matches_filter(filter, state)
-        } else {
-            false
+        match &construction.construction_type {
+            ConstructionType::Building(building) => building.matches_filter(filter, state),
+            ConstructionType::Unit(unit) => unit.matches_filter(filter, state),
+            _ => false
         }
     }
 
@@ -424,7 +431,7 @@ impl<'a> CityStats<'a> {
             buildings_maintenance *= self.city.civ.game_info.get_difficulty().ai_building_maintenance_modifier;
         }
 
-        for unique in self.city.get_matching_uniques(UniqueType::BuildingMaintenance, &self.city.state) {
+        for unique in self.city.get_matching_uniques(UniqueType::BuildingMaintenance, Some(&self.city.state), true) {
             buildings_maintenance *= unique.params[0].parse::<f32>().unwrap_or(0.0).to_percent();
         }
 
@@ -492,8 +499,8 @@ impl<'a> CityStats<'a> {
 
         let mut unhappiness_from_citizens = self.city.population.population as f32;
 
-        for unique in self.city.get_matching_uniques(UniqueType::UnhappinessFromPopulationTypePercentageChange, &self.city.state) {
-            if self.city.matches_filter(&unique.params[2]) {
+        for unique in self.city.get_matching_uniques(UniqueType::UnhappinessFromPopulationTypePercentageChange, Some(&self.city.state), true) {
+            if self.city.matches_filter(&unique.params[2], None, false) {
                 unhappiness_from_citizens += (unique.params[0].parse::<f32>().unwrap_or(0.0) / 100.0)
                     * self.city.population.get_population_filter_amount(&unique.params[1]) as f32;
             }
@@ -513,7 +520,7 @@ impl<'a> CityStats<'a> {
             new_happiness_list.insert("Occupied City".to_string(), -2.0); // annexed city
         }
 
-        let happiness_from_specialists = self.get_stats_from_specialists(&self.city.population.get_new_specialists()).happiness as f32;
+        let happiness_from_specialists = self.get_stats_from_specialists(self.city.population.get_new_specialists()).happiness as f32;
         if happiness_from_specialists > 0.0 {
             new_happiness_list.insert("Specialists".to_string(), happiness_from_specialists);
         }
@@ -546,7 +553,7 @@ impl<'a> CityStats<'a> {
         );
 
         new_base_stat_list.insert("Tile yields".to_string(), self.stats_from_tiles.clone());
-        new_base_stat_list.insert("Specialists".to_string(), self.get_stats_from_specialists(&self.city.population.get_new_specialists()));
+        new_base_stat_list.insert("Specialists".to_string(), self.get_stats_from_specialists(self.city.population.get_new_specialists()));
         new_base_stat_list.insert("Trade routes".to_string(), self.get_stats_from_trade_route());
         new_base_stat_tree.children.insert("Buildings".to_string(), stats_from_buildings.clone());
 
@@ -558,7 +565,7 @@ impl<'a> CityStats<'a> {
         self.base_stat_tree = new_base_stat_tree;
     }
 
-    fn update_stat_percent_bonus_list(&mut self, current_construction: &dyn IConstruction) {
+    fn update_stat_percent_bonus_list(&mut self, current_construction: &Construction) {
         let mut new_stats_bonus_tree = StatTreeNode::new();
 
         new_stats_bonus_tree.add_stats(
@@ -597,7 +604,7 @@ impl<'a> CityStats<'a> {
 
     pub fn update(
         &mut self,
-        current_construction: Option<&dyn IConstruction>,
+        current_construction: Option<&Construction>,
         update_tile_stats: bool,
         update_civ_stats: bool,
         local_unique_cache: &LocalUniqueCache
@@ -628,7 +635,7 @@ impl<'a> CityStats<'a> {
         }
     }
 
-    fn update_final_stat_list(&mut self, current_construction: &dyn IConstruction) {
+    fn update_final_stat_list(&mut self, current_construction: &Construction) {
         let mut new_final_stat_list = HashMap::new(); // again, we don't edit the existing currentCityStats directly, in order to avoid concurrency exceptions
 
         for (key, value) in &self.base_stat_tree.children {
@@ -680,7 +687,7 @@ impl<'a> CityStats<'a> {
             entry.science *= stat_percent_bonuses_sum.science.to_percent();
         }
 
-        for unique in self.city.get_matching_uniques(UniqueType::NullifiesStat, &self.city.state) {
+        for unique in self.city.get_matching_uniques(UniqueType::NullifiesStat, Some(&self.city.state), true) {
             if let Ok(stat_to_be_removed) = Stat::from_str(&unique.params[0]) {
                 let removed_amount: f32 = new_final_stat_list.values().map(|s| s.get(stat_to_be_removed)).sum();
 
@@ -743,7 +750,7 @@ impl<'a> CityStats<'a> {
             );
         }
 
-        if let Some(growth_nullifying_unique) = self.city.get_matching_uniques(UniqueType::NullifiesGrowth, &self.city.state).first() {
+        if let Some(growth_nullifying_unique) = self.city.get_matching_uniques(UniqueType::NullifiesGrowth, Some(&self.city.state), true).first() {
             // Does not nullify negative growth (starvation)
             let current_growth: f32 = new_final_stat_list.values().map(|s| s.get(Stat::Food)).sum();
             if current_growth > 0.0 {
@@ -766,10 +773,10 @@ impl<'a> CityStats<'a> {
         self.final_stat_list = new_final_stat_list;
     }
 
-    pub fn can_convert_food_to_production(&self, food: f32, current_construction: &dyn IConstruction) -> bool {
+    pub fn can_convert_food_to_production(&self, food: f32, current_construction: &Construction) -> bool {
         food > 0.0
-            && current_construction.is_non_perpetual_construction()
-            && current_construction.has_unique(UniqueType::ConvertFoodToProductionWhenConstructed)
+            && !current_construction.is_perpetual
+            && current_construction.get_matching_uniques_not_conflicting(UniqueType::ConvertFoodToProductionWhenConstructed, &self.city.state).len() > 0
     }
 
     /// Calculate the conversion of the excessive food to production when
@@ -793,8 +800,8 @@ impl<'a> CityStats<'a> {
         let mut food_eaten = self.city.population.population as f32 * 2.0;
         let mut food_eaten_by_specialists = 2.0 * self.city.population.get_number_of_specialists() as f32;
 
-        for unique in self.city.get_matching_uniques(UniqueType::FoodConsumptionBySpecialists, &self.city.state) {
-            if self.city.matches_filter(&unique.params[1]) {
+        for unique in self.city.get_matching_uniques(UniqueType::FoodConsumptionBySpecialists, Some(&self.city.state), true) {
+            if self.city.matches_filter(&unique.params[1], None, false) {
                 food_eaten_by_specialists *= unique.params[0].parse::<f32>().unwrap_or(0.0).to_percent();
             }
         }

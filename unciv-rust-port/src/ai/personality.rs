@@ -22,3 +22,6 @@ pub enum PersonalityValue {
     /// Likelihood to use culture
     UseCulture,
 }
+
+
+

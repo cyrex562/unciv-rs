@@ -12,8 +12,10 @@ use crate::ui::{
 use crate::game::{
     city::City,
     city_constructions::CityConstructions,
-    construction::{IConstruction, PerpetualConstruction},
+};
+use crate::ruleset::{
     building::Building,
+    construction_new::{Construction, ConstructionType},
 };
 
 /// A context menu for City constructions - available by right-clicking (or long-press) in
@@ -21,7 +23,7 @@ use crate::game::{
 pub struct CityScreenConstructionMenu {
     base: AnimatedMenuPopup,
     city: Rc<City>,
-    construction: Rc<dyn IConstruction>,
+    construction: Rc<Construction>,
     on_button_clicked: Option<Box<dyn FnOnce()>>,
     any_button_was_clicked: bool,
 }
@@ -32,7 +34,7 @@ impl CityScreenConstructionMenu {
         screen: Rc<BaseScreen>,
         position_next_to: &egui::Response,
         city: Rc<City>,
-        construction: Rc<dyn IConstruction>,
+        construction: Rc<Construction>,
         on_button_clicked: Option<Box<dyn FnOnce()>>,
     ) -> Self {
         let position = Self::get_actor_top_right(position_next_to);
@@ -82,7 +84,7 @@ impl CityScreenConstructionMenu {
         F: Fn(&CityConstructions) -> bool,
     {
         self.city.civ.cities.len() > 1 && // Yes any 2 cities
-        !(self.construction.as_any().downcast_ref::<Building>().map_or(false, |b| b.is_any_wonder())) &&
+        !matches!(self.construction.construction_type, ConstructionType::Building(ref b) if b.is_any_wonder()) &&
         self.candidate_cities().iter()
             .map(|city| &city.city_constructions)
             .any(predicate)
@@ -100,13 +102,13 @@ impl CityScreenConstructionMenu {
 
     /// Check if we can move the construction to the top of the queue
     fn can_move_queue_top(&self) -> bool {
-        if self.construction.as_any().downcast_ref::<PerpetualConstruction>().is_some() {
+        if self.construction.is_perpetual {
             return false;
         }
 
         let my_index = self.city.city_constructions.construction_queue
             .iter()
-            .position(|c| c.name() == self.construction.name())
+            .position(|c| c.name == self.construction.name)
             .unwrap_or(usize::MAX);
 
         my_index > 0
@@ -116,7 +118,7 @@ impl CityScreenConstructionMenu {
     fn move_queue_top(&mut self) {
         let my_index = self.city.city_constructions.construction_queue
             .iter()
-            .position(|c| c.name() == self.construction.name())
+            .position(|c| c.name == self.construction.name)
             .unwrap_or(usize::MAX);
 
         if my_index != usize::MAX {
@@ -127,18 +129,18 @@ impl CityScreenConstructionMenu {
 
     /// Check if we can move the construction to the end of the queue
     fn can_move_queue_end(&self) -> bool {
-        if self.construction.as_any().downcast_ref::<PerpetualConstruction>().is_some() {
+        if self.construction.is_perpetual {
             return false;
         }
 
         let my_index = self.city.city_constructions.construction_queue
             .iter()
-            .position(|c| c.name() == self.construction.name())
+            .position(|c| c.name == self.construction.name)
             .unwrap_or(usize::MAX);
 
         let queue_size_without_perpetual = self.city.city_constructions.construction_queue
             .iter()
-            .filter(|c| !c.as_any().downcast_ref::<PerpetualConstruction>().is_some())
+            .filter(|c| !c.is_perpetual)
             .count();
 
         my_index < queue_size_without_perpetual - 1
@@ -148,7 +150,7 @@ impl CityScreenConstructionMenu {
     fn move_queue_end(&mut self) {
         let my_index = self.city.city_constructions.construction_queue
             .iter()
-            .position(|c| c.name() == self.construction.name())
+            .position(|c| c.name == self.construction.name)
             .unwrap_or(usize::MAX);
 
         if my_index != usize::MAX {
@@ -159,7 +161,7 @@ impl CityScreenConstructionMenu {
 
     /// Check if we can add the construction to the top of the queue
     fn can_add_queue_top(&self) -> bool {
-        !self.construction.as_any().downcast_ref::<PerpetualConstruction>().is_some() &&
+        !self.construction.is_perpetual &&
         self.city.city_constructions.can_add_to_queue(&self.construction)
     }
 
@@ -174,8 +176,8 @@ impl CityScreenConstructionMenu {
         self.all_cities_entry_valid(|constructions| {
             constructions.can_add_to_queue(&self.construction) &&
             // A Perpetual that is already queued can still be added says canAddToQueue, but here we don't want to count that
-            !(self.construction.as_any().downcast_ref::<PerpetualConstruction>().is_some() &&
-              constructions.is_being_constructed_or_enqueued(self.construction.name()))
+            !(self.construction.is_perpetual &&
+              constructions.is_being_constructed_or_enqueued(&self.construction.name))
         })
     }
 
@@ -189,10 +191,10 @@ impl CityScreenConstructionMenu {
 
     /// Check if we can add the construction to the top of all queues
     fn can_add_all_queues_top(&self) -> bool {
-        !self.construction.as_any().downcast_ref::<PerpetualConstruction>().is_some() &&
+        !self.construction.is_perpetual &&
         self.all_cities_entry_valid(|constructions| {
             constructions.can_add_to_queue(&self.construction) ||
-            constructions.is_enqueued_for_later(self.construction.name())
+            constructions.is_enqueued_for_later(&self.construction.name)
         })
     }
 
@@ -201,7 +203,7 @@ impl CityScreenConstructionMenu {
         self.for_all_cities(|constructions| {
             let index = constructions.construction_queue
                 .iter()
-                .position(|c| c.name() == self.construction.name())
+                .position(|c| c.name == self.construction.name)
                 .unwrap_or(usize::MAX);
 
             if index > 0 {
@@ -216,14 +218,14 @@ impl CityScreenConstructionMenu {
     /// Check if we can remove the construction from all queues
     fn can_remove_all_queues(&self) -> bool {
         self.all_cities_entry_valid(|constructions| {
-            constructions.is_being_constructed_or_enqueued(self.construction.name())
+            constructions.is_being_constructed_or_enqueued(&self.construction.name)
         })
     }
 
     /// Remove the construction from all queues
     fn remove_all_queues(&mut self) {
         self.for_all_cities(|constructions| {
-            constructions.remove_all_by_name(self.construction.name());
+            constructions.remove_all_by_name(&self.construction.name);
         });
         self.any_button_was_clicked = true;
     }
@@ -231,14 +233,14 @@ impl CityScreenConstructionMenu {
     /// Check if we can disable the construction
     fn can_disable(&self) -> bool {
         let settings = self.city.civ.game.settings();
-        !settings.disabled_auto_assign_constructions.contains(&self.construction.name()) &&
-        !self.construction.as_any().downcast_ref::<PerpetualConstruction>().map_or(false, |p| p.is_idle())
+        !settings.disabled_auto_assign_constructions.contains(&self.construction.name) &&
+        !matches!(self.construction.construction_type, ConstructionType::Idle)
     }
 
     /// Disable the construction
     fn disable_entry(&mut self) {
         let settings = self.city.civ.game.settings_mut();
-        settings.disabled_auto_assign_constructions.insert(self.construction.name());
+        settings.disabled_auto_assign_constructions.insert(self.construction.name.clone());
         settings.save();
         self.any_button_was_clicked = true;
     }
@@ -246,13 +248,13 @@ impl CityScreenConstructionMenu {
     /// Check if we can enable the construction
     fn can_enable(&self) -> bool {
         let settings = self.city.civ.game.settings();
-        settings.disabled_auto_assign_constructions.contains(&self.construction.name())
+        settings.disabled_auto_assign_constructions.contains(&self.construction.name)
     }
 
     /// Enable the construction
     fn enable_entry(&mut self) {
         let settings = self.city.civ.game.settings_mut();
-        settings.disabled_auto_assign_constructions.remove(&self.construction.name());
+        settings.disabled_auto_assign_constructions.remove(&self.construction.name);
         settings.save();
         self.any_button_was_clicked = true;
     }

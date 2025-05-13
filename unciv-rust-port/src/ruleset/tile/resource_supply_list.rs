@@ -1,9 +1,7 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
-
-use crate::constants::CITY_STATES;
-use crate::models::ruleset::{Ruleset, IConstruction};
-use crate::models::ruleset::tile::TileResource;
+use crate::{constants::constants::diplomacy::CITY_STATES, ruleset::tile::tile_resource::TileResource};
+use crate::ruleset::ruleset::Ruleset;
 
 /// Represents a supply of a resource from a specific origin
 #[derive(Clone, Debug, Serialize, Deserialize)]
