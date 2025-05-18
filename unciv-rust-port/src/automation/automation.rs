@@ -5,8 +5,8 @@ use crate::civilization::civilization::Civilization;
 use crate::city::city::City;
 use crate::city::city_focus::CityFocus;
 use crate::city::city_stats::CityStats;
-use crate::ruleset::construction::{INonPerpetualConstruction, PerpetualConstruction};
 use crate::ai::personality::PersonalityValue;
+use crate::ruleset::construction_new::PerpetualConstruction;
 use crate::ruleset::tile::resource_type::ResourceType;
 use crate::ruleset::tile::tile_improvement::TileImprovement;
 use crate::stats::stats::Stats;
@@ -123,7 +123,7 @@ impl Automation {
         let starving = surplus_food < 0.0;
 
         // Handle Food to Production conversion
-        if city_stats_obj.can_convert_food_to_production(surplus_food, &city.city_constructions.get_current_construction()) {
+        if city_stats_obj.can_convert_food_to_production(surplus_food, city.city_constructions.get_current_construction().as_ref()) {
             yield_stats.production += city_stats_obj.get_production_from_excessive_food(surplus_food + yield_stats.food)
                 - city_stats_obj.get_production_from_excessive_food(surplus_food);
             yield_stats.food = 0.0;

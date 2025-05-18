@@ -1,7 +1,10 @@
 // Update the import path to the correct module where Civilization is defined
 
-use crate::{automation::unit::{BattleHelper, UnitAutomation}, civilization::civilization::Civilization, map::MapUnit};
-use crate::constants::BARBARIAN_ENCAMPMENT;
+use crate::{
+    automation::unit::{BattleHelper, UnitAutomation},
+    civilization::civilization::Civilization,
+    map::MapUnit,
+};
 
 /// Handles automation of barbarian units in the game.
 pub struct BarbarianAutomation<'a> {
@@ -29,7 +32,10 @@ impl<'a> BarbarianAutomation<'a> {
         }
 
         // Finally process other units
-        for unit in civ_units.iter().filter(|u| !u.base_unit.is_ranged() && !u.base_unit.is_melee()) {
+        for unit in civ_units
+            .iter()
+            .filter(|u| !u.base_unit.is_ranged() && !u.base_unit.is_melee())
+        {
             self.automate_unit(unit);
         }
 
@@ -38,19 +44,19 @@ impl<'a> BarbarianAutomation<'a> {
     }
 
     /// Automates a single unit based on its type and current state.
-    fn automate_unit(&self, unit: &MapUnit) {
+    fn automate_unit(&self, unit: &mut MapUnit) {
         if unit.is_civilian() {
             self.automate_captured_civilian(unit);
         } else {
-    match unit.current_tile.improvement == BARBARIAN_ENCAMPMENT {
-            true => {
-                self.automate_unit_on_encampment(unit);
-            }
-            false => {
+            match unit.current_tile.improvement == BARBARIAN_ENCAMPMENT {
+                true => {
+                    self.automate_unit_on_encampment(unit);
+                }
+                false => {
                     self.automate_combat_unit(unit);
                 }
+            }
         }
-}
     }
 
     /// Handles automation of captured civilian units.
@@ -61,29 +67,37 @@ impl<'a> BarbarianAutomation<'a> {
         }
 
         // 2. Find and move to nearest available encampment
-        let camp_tiles: Vec<_> = self.civ_info.game_info.barbarians.encampments
+        let camp_tiles: Vec<_> = self
+            .civ_info
+            .game_info
+            .barbarians
+            .encampments
             .iter()
             .map(|camp| self.civ_info.game_info.tile_map.get_tile(camp.position))
             .collect();
 
-        let mut camp_tiles: Vec<_> = camp_tiles.into_iter()
-            .filter_map(|t| t)
-            .collect();
+        let mut camp_tiles: Vec<_> = camp_tiles.into_iter().filter_map(|t| t).collect();
 
         camp_tiles.sort_by(|a, b| {
-            unit.current_tile.aerial_distance_to(a)
+            unit.current_tile
+                .aerial_distance_to(a)
                 .partial_cmp(&unit.current_tile.aerial_distance_to(b))
                 .unwrap_or(std::cmp::Ordering::Equal)
         });
 
-        let best_camp = camp_tiles.iter()
+        let best_camp = camp_tiles
+            .iter()
             .find(|tile| tile.civilian_unit.is_none() && unit.movement.can_reach(tile));
 
         if let Some(camp) = best_camp {
             unit.movement.head_towards(camp);
         } else {
             // 3. Wander aimlessly if no reachable encampment found
-            UnitAutomation::wander(unit, &mut self.civ_info.game_info, &mut self.civ_info.clone());
+            UnitAutomation::wander(
+                unit,
+                &mut self.civ_info.game_info,
+                &mut self.civ_info.clone(),
+            );
         }
     }
 
@@ -106,7 +120,10 @@ impl<'a> BarbarianAutomation<'a> {
     /// Handles automation of combat units.
     fn automate_combat_unit(&self, unit: &MapUnit) {
         // 1. Try pillaging to restore health (barbs don't auto-heal)
-        if unit.health < 50 && UnitAutomation::try_pillage_improvement(unit, true) && !unit.has_movement() {
+        if unit.health < 50
+            && UnitAutomation::try_pillage_improvement(unit, true)
+            && !unit.has_movement()
+        {
             return;
         }
 
@@ -132,6 +149,10 @@ impl<'a> BarbarianAutomation<'a> {
         }
 
         // 5. Wander
-        UnitAutomation::wander(unit, &mut self.civ_info.game_info, &mut self.civ_info.clone());
+        UnitAutomation::wander(
+            unit,
+            &mut self.civ_info.game_info,
+            &mut self.civ_info.clone(),
+        );
     }
 }

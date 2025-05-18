@@ -1,18 +1,6 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use crate::city::City;
-use crate::models::ruleset::building::Building;
-use crate::models::ruleset::construction::{Construction, NonPerpetualConstruction, PerpetualConstruction};
-use crate::models::ruleset::unique::unique_map::UniqueMap;
-use crate::models::ruleset::unit::base_unit::BaseUnit;
-use crate::models::stats::stat::Stat;
-use crate::models::stats::stats::Stats;
-use crate::models::ruleset::unique::unique_type::UniqueType;
-use crate::models::ruleset::unique::state_for_conditionals::StateForConditionals;
-use crate::models::ruleset::unique::unique::Unique;
-use crate::models::ruleset::ruleset::Ruleset;
-use crate::models::stats::stat_tree_node::StatTreeNode;
-use crate::utils::cloner::Cloner;
+
 
 /// City constructions manager
 pub struct CityConstructions {
@@ -45,7 +33,6 @@ pub struct CityConstructions {
 
     /// Free buildings provided from this city
     pub free_buildings_provided_from_this_city: HashMap<String, HashSet<String>>,
-}
 
 impl CityConstructions {
     /// Creates a new CityConstructions
@@ -182,9 +169,33 @@ impl CityConstructions {
     }
 
     /// Gets the current construction
-    pub fn get_current_construction(&self) -> Box<dyn Construction> {
-        self.get_construction(&self.get_current_construction_from_queue())
+    /// Gets the current construction as an enum for concrete access
+    pub fn get_current_construction(&self) -> Option<ConstructionRef> {
+        let construction_name = self.get_current_construction_from_queue();
+        if construction_name.is_empty() {
+            return None;
+        }
+        let ruleset = self.city.as_ref().unwrap().get_ruleset();
+
+        if let Some(building) = ruleset.buildings.get(&construction_name) {
+            return Some(ConstructionRef::Building(building));
+        }
+        if let Some(unit) = ruleset.units.get(&construction_name) {
+            return Some(ConstructionRef::Unit(unit));
+        }
+        if let Some(perpetual) = PerpetualConstruction::perpetual_constructions_map.get(&construction_name) {
+            return Some(ConstructionRef::Perpetual(perpetual));
+        }
+        None
     }
+}
+
+/// Enum for concrete construction reference
+pub enum ConstructionRef<'a> {
+    Building(&'a Building),
+    Unit(&'a BaseUnit),
+    Perpetual(&'a PerpetualConstruction),
+}
 
     /// Checks if a building is built
     pub fn is_built(&self, building_name: &str) -> bool {
