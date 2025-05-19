@@ -1,3 +1,5 @@
+use crate::ruleset::construction_new::PerpetualConstruction;
+
 /// This struct handles everything related to buying constructions. This includes
 /// showing and handling [ConfirmBuyPopup] and the actual purchase in [purchase_construction].
 pub struct BuyButtonFactory<'a> {

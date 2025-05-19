@@ -2,11 +2,7 @@ use crate::battle::battle::CombatAction;
 use crate::battle::i_combatant::ICombatant;
 use crate::battle::map_unit_combatant::MapUnitCombatant;
 use crate::battle::target_helper::target_helper;
-use crate::map::map_unit::MapUnit;
-use crate::map::tile::Tile;
-use crate::models::unique::state_for_conditionals::StateForConditionals;
-use crate::models::unique::unique::Unique;
-use crate::models::unique::unique_type::UniqueType;
+
 use std::collections::HashMap;
 use std::sync::Arc;
 

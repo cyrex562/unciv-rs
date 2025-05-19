@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 use crate::automation::unit::civilian_unit_automation::CivilianUnitAutomation;
 use crate::automation::unit::city_location_tile_ranker::CityLocationTileRanker;
+use crate::unit_action::UnitActionType;
 
 /// Contains automation logic for specific unit types
 pub struct SpecificUnitAutomation;

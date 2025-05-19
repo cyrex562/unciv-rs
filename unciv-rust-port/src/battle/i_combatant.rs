@@ -1,5 +1,5 @@
-use crate::civilization::Civilization;
-use crate::map::tile::Tile;
+use crate::civilization::civilization::Civilization;
+use crate::tile::tile::Tile;
 use crate::models::unciv_sound::UncivSound;
 use crate::models::unit_type::UnitType;
 use std::sync::Arc;

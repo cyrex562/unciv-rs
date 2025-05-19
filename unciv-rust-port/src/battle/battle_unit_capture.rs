@@ -1,19 +1,10 @@
 use crate::battle::battle::Battle;
 use crate::battle::i_combatant::ICombatant;
 use crate::battle::map_unit_combatant::MapUnitCombatant;
-use crate::civilization::alert_type::AlertType;
 use crate::civilization::civilization::Civilization;
-use crate::civilization::map_unit_action::MapUnitAction;
-use crate::civilization::notification_category::NotificationCategory;
-use crate::civilization::notification_icon::NotificationIcon;
 use crate::civilization::player_type::PlayerType;
 use crate::civilization::popup_alert::PopupAlert;
-use crate::constants::Constants;
-use crate::map::map_unit::MapUnit;
-use crate::map::tile::Tile;
-use crate::models::unique::state_for_conditionals::StateForConditionals;
-use crate::models::unique::unique_type::UniqueType;
-use crate::utils::random::Random;
+
 use std::cmp::min;
 use std::collections::HashMap;
 use std::f32;

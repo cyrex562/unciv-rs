@@ -1,14 +1,9 @@
-use crate::models::civilization::Civilization;
-use crate::models::map::mapunit::MapUnit;
-use crate::models::map::tile::Tile;
-use crate::models::ruleset::unique::UniqueType;
 use crate::battle::attackable_tile::AttackableTile;
 use crate::battle::battle::Battle;
 use crate::battle::battle_damage::battle_damage;
 use crate::battle::city_combatant::CityCombatant;
 use crate::battle::map_unit_combatant::MapUnitCombatant;
 use crate::battle::target_helper::target_helper;
-use crate::models::city::City;
 use std::collections::HashMap;
 
 /// Contains helper functions for battle-related automation

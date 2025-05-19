@@ -1,10 +1,3 @@
-use crate::models::civilization::Civilization;
-use crate::models::map::mapunit::MapUnit;
-use crate::models::map::tile::Tile;
-use crate::models::city::City;
-use crate::models::battle::BattleDamage;
-use crate::models::battle::CityCombatant;
-use crate::models::battle::MapUnitCombatant;
 use crate::automation::civilization::next_turn_automation::NextTurnAutomation;
 
 /// Contains logic for automating unit movement towards enemy cities

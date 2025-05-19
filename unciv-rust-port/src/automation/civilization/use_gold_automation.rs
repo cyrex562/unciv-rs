@@ -1,11 +1,3 @@
-use crate::models::civilization::Civilization;
-use crate::models::city::City;
-use crate::models::map::tile::Tile;
-use crate::models::map::bfs::BFS;
-use crate::models::ruleset::INonPerpetualConstruction;
-use crate::models::ruleset::tile::ResourceType;
-use crate::models::ruleset::unique::UniqueType;
-use crate::models::stats::Stat;
 use crate::automation::unit::UnitAutomation;
 use crate::automation::civilization::MotivationToAttackAutomation;
 use crate::automation::civilization::NextTurnAutomation;

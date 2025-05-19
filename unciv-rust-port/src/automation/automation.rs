@@ -20,6 +20,7 @@ use crate::tile::tile::Tile;
 use crate::map::MapUnit;
 use crate::ranking_type::RankingType;
 use std::collections::HashMap;
+use crate::ruleset::construction_new::NonPerpetualConstruction;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ThreatLevel {
@@ -371,7 +372,7 @@ impl Automation {
     pub fn allow_automated_construction(
         civ_info: &Civilization,
         city: &City,
-        construction: &dyn INonPerpetualConstruction
+        construction: &NonPerpetualConstruction
     ) -> bool {
         Self::allow_create_improvement_buildings(civ_info, city, construction)
             && Self::allow_spending_resource(civ_info, construction, Some(city))
@@ -380,7 +381,7 @@ impl Automation {
     fn allow_create_improvement_buildings(
         civ_info: &Civilization,
         city: &City,
-        construction: &dyn INonPerpetualConstruction
+        construction: &NonPerpetualConstruction
     ) -> bool {
         if let Some(building) = construction.downcast_ref::<Building>() {
             if !building.has_create_one_improvement_unique() {
@@ -397,7 +398,7 @@ impl Automation {
 
     pub fn allow_spending_resource(
         civ_info: &Civilization,
-        construction: &dyn INonPerpetualConstruction,
+        construction: &NonPerpetualConstruction,
         city_info: Option<&City>
     ) -> bool {
         if civ_info.is_city_state {

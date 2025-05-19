@@ -1,14 +1,4 @@
-use crate::automation::Automation;
-use crate::models::city::City;
-use crate::models::civilization::Civilization;
-use crate::models::civilization::diplomacy::DiplomacyFlags;
-use crate::models::map::hex_math::HexMath;
-use crate::models::map::mapunit::MapUnit;
-use crate::models::map::tile::Tile;
-use crate::models::ruleset::tile::ResourceType;
-use crate::models::ruleset::unique::LocalUniqueCache;
-use crate::models::ruleset::unique::StateForConditionals;
-use crate::models::ruleset::unique::UniqueType;
+
 use std::collections::{HashMap, HashSet};
 
 /// Contains logic for ranking and selecting optimal city locations

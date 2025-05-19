@@ -1,5 +1,3 @@
-use crate::battle::ICombatant;
-use crate::map::Tile;
 
 /// Represents a tile that can be attacked, along with information about the attack position and movement costs.
 pub struct AttackableTile {

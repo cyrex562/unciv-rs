@@ -1,14 +1,8 @@
 use crate::battle::battle::CombatAction;
 use crate::battle::i_combatant::ICombatant;
 use crate::city;
-use crate::constants::Constants;
 use crate::logic::multi_filter::MultiFilter;
-use crate::map::city::City;
-use crate::map::tile::Tile;
-use crate::models::sound::UncivSound;
-use crate::models::unique::state_for_conditionals::StateForConditionals;
-use crate::models::unique::unique_type::UniqueType;
-use crate::models::unit_type::UnitType;
+
 use std::f32;
 use std::sync::Arc;
 

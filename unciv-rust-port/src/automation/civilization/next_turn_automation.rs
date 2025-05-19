@@ -4,7 +4,9 @@ use crate::automation::civilization::TradeAutomation;
 use crate::automation::civilization::UseGoldAutomation;
 use crate::automation::unit::EspionageAutomation;
 use crate::automation::unit::UnitAutomation;
+use crate::automation::barbarian::barbarian_automation::BarbarianAutomation;
 use crate::civilization::civilization::Civilization;
+use crate::unique::unique_type::UniqueType;
 
 /// Contains logic for automating a civilization's turn.
 pub struct NextTurnAutomation;

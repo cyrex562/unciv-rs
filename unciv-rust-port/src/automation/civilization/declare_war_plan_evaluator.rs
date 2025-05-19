@@ -1,4 +1,10 @@
 use crate::{automation::civilization::motivation_to_attack_automation::MotivationToAttackAutomation, ranking_type::RankingType};
+use crate::civilization::civilization::Civilization;
+use crate::ai::personality::PersonalityValue;
+
+use crate::diplomacy::status::DiplomaticStatus;
+use crate::diplomacy::relationship_level::RelationshipLevel;
+use serde::{Serialize, Deserialize};
 
 /// Contains the logic for evaluating how we want to declare war on another civ.
 pub struct DeclareWarPlanEvaluator;
@@ -98,7 +104,7 @@ impl DeclareWarPlanEvaluator {
 
         let mut motivation = motivation;
         // We need to be able to trust the thirdCiv at least somewhat
-        if third_civ_diplo.diplomatic_status != DiplomaticStatus::DefensivePact
+        if !third_civ_diplo.has_defensive_pact()
             && third_civ_diplo.opinion_of_other_civ() + motivation * 2.0 < 80.0
         {
             motivation -= 80.0 - third_civ_diplo.opinion_of_other_civ() + motivation * 2.0;

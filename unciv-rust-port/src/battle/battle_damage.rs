@@ -7,15 +7,7 @@ use crate::battle::i_combatant::ICombatant;
 use crate::battle::map_unit_combatant::MapUnitCombatant;
 use crate::battle::city_combatant::CityCombatant;
 use crate::battle::great_general_implementation::GreatGeneralImplementation;
-use crate::map::tile::Tile;
-use crate::models::counter::Counter;
-use crate::models::unique::state_for_conditionals::StateForConditionals;
-use crate::models::unique::unique::Unique;
-use crate::models::unique::unique_target::UniqueTarget;
-use crate::models::unique::unique_type::UniqueType;
-use crate::models::global_uniques::GlobalUniques;
-use crate::utils::random::Random;
-use crate::utils::translations::tr;
+
 
 /// Enum representing different combat actions
 #[derive(Debug, Clone, Copy, PartialEq)]

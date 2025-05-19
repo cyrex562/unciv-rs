@@ -1,13 +1,4 @@
 use crate::automation::unit::SpecificUnitAutomation;
-use crate::models::civilization::Civilization;
-use crate::models::civilization::managers::ReligionState;
-use crate::models::map::mapunit::MapUnit;
-use crate::models::map::tile::Tile;
-use crate::models::UnitActionType;
-use crate::models::ruleset::unique::UniqueTriggerActivation;
-use crate::models::ruleset::unique::UniqueType;
-use crate::ui::screens::worldscreen::unit::actions::UnitActionModifiers;
-use crate::ui::screens::worldscreen::unit::actions::UnitActions;
 use std::collections::HashSet;
 
 /// Contains logic for automating civilian units

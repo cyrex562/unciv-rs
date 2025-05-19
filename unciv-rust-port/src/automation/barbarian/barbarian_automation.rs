@@ -4,6 +4,7 @@ use crate::{
     automation::unit::{BattleHelper, UnitAutomation},
     civilization::civilization::Civilization,
     map::MapUnit,
+    constants::BARBARIAN_ENCAMPMENT
 };
 
 /// Handles automation of barbarian units in the game.
@@ -102,7 +103,7 @@ impl<'a> BarbarianAutomation<'a> {
     }
 
     /// Handles automation of units stationed at encampments.
-    fn automate_unit_on_encampment(&self, unit: &MapUnit) {
+    fn automate_unit_on_encampment(&self, unit: &mut MapUnit) {
         // 1. Try to upgrade
         if UnitAutomation::try_upgrade_unit(unit) {
             return;
@@ -118,7 +119,7 @@ impl<'a> BarbarianAutomation<'a> {
     }
 
     /// Handles automation of combat units.
-    fn automate_combat_unit(&self, unit: &MapUnit) {
+    fn automate_combat_unit(&self, unit: &mut MapUnit) {
         // 1. Try pillaging to restore health (barbs don't auto-heal)
         if unit.health < 50
             && UnitAutomation::try_pillage_improvement(unit, true)
