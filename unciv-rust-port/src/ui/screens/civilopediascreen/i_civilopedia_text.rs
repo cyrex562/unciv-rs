@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use bevy_egui::egui::{self, Frame};
 
-use crate::models::ruleset::{Ruleset, IRulesetObject};
+use crate::models::ruleset::{Ruleset};
 use crate::models::stats::INamed;
 use crate::ui::screens::civilopediascreen::formatted_line::FormattedLine;
 use crate::ui::screens::civilopediascreen::markup_renderer::MarkupRenderer;
@@ -114,7 +114,7 @@ pub trait ICivilopediaText {
         }
 
         // Add mod information if applicable
-        if let Some(ruleset_obj) = self.as_any().downcast_ref::<dyn IRulesetObject>() {
+        if let Some(ruleset_obj) = self.as_any().downcast_ref::<Ruleset>() {
             if ruleset.mods.len() > 1 && !ruleset_obj.origin_ruleset().is_empty() {
                 new_lines.push(FormattedLine::new());
                 new_lines.push(FormattedLine::new()

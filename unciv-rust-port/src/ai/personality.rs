@@ -3,7 +3,6 @@ use std::collections::HashMap;
 
 use crate::{ruleset::ruleset_object::RulesetObject, stats::{stat::Stat, stats::Stats}};
 
-
 /// Type of Personality focus. Typically ranges from 0 (no focus) to 10 (double focus)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PersonalityValue {
@@ -50,6 +49,7 @@ impl PersonalityValue {
 /// Represents a personality in the game
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Personality {
+    pub ruleset_object: RulesetObject,
     /// Production focus value (0-10)
     pub production: f32,
     /// Food focus value (0-10)
@@ -90,6 +90,7 @@ impl Personality {
     /// Creates a new Personality with default values
     pub fn new() -> Self {
         Personality {
+            ruleset_object: RulesetObject::default(),
             production: 5.0,
             food: 5.0,
             gold: 5.0,
@@ -213,17 +214,12 @@ impl Personality {
         }
         stats
     }
-}
 
-impl RulesetObject for Personality {
-    fn get_unique_target(&self) -> UniqueTarget {
-        UniqueTarget::Personality
+    pub fn origin_ruleset(&self) -> &str {
+        &self.ruleset_object.origin_ruleset
     }
 
-    fn make_link(&self) -> String {
-        "Personality".to_string()
+    pub fn set_origin_ruleset(&mut self, origin: String) {
+        self.ruleset_object.origin_ruleset = origin;
     }
 }
-
-
-

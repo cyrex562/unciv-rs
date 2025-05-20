@@ -4,7 +4,6 @@ use bevy::prelude::*;
 use regex::Regex;
 use once_cell::sync::Lazy;
 
-use crate::models::ruleset::IRulesetObject;
 use crate::models::stats::{INamed, Stat};
 use crate::ui::screens::devconsole::dev_console_popup::DevConsolePopup;
 use crate::ui::screens::devconsole::console_error::ConsoleErrorException;
@@ -242,7 +241,7 @@ pub fn split_to_cli_input(s: &str) -> Vec<CliInput> {
 
 // Extension trait for DevConsolePopup
 pub trait DevConsolePopupExt {
-    fn find_cli_input<T: IRulesetObject>(&self, param: &CliInput) -> Option<&T>;
+    fn find_cli_input<T: INamed>(&self, param: &CliInput) -> Option<&T>;
     fn get_autocomplete_string(
         &self,
         last_word: &CliInput,
@@ -251,7 +250,7 @@ pub trait DevConsolePopupExt {
 }
 
 impl DevConsolePopupExt for DevConsolePopup {
-    fn find_cli_input<T: IRulesetObject>(&self, param: &CliInput) -> Option<&T> {
+    fn find_cli_input<T: INamed>(&self, param: &CliInput) -> Option<&T> {
         self.game_info.ruleset.all_ruleset_objects()
             .filter_map(|obj| obj.as_any().downcast_ref::<T>())
             .find(|obj| param.equals(&obj.name()))

@@ -5,7 +5,7 @@ use crate::constants::Constants;
 use crate::logic::multi_filter::MultiFilter;
 use crate::logic::map::mapunit::MapUnitCache;
 use crate::models::ruleset::{
-    IRulesetObject, Ruleset, RulesetCache,
+    Ruleset, RulesetCache,
     unique::{IHasUniques, Unique, UniqueComplianceError, UniqueFlag,
              UniqueParameterType, UniqueTarget, UniqueType, DeprecationLevel}
 };
@@ -617,23 +617,13 @@ impl UniqueValidator {
 
     /// Gets the prefix for a unique container
     pub fn get_unique_container_prefix(unique_container: Option<&dyn IHasUniques>) -> String {
-        let origin_prefix = if let Some(container) = unique_container {
-            if let Some(ruleset_obj) = container.as_any().downcast_ref::<dyn IRulesetObject>() {
-                format!("{}: ", ruleset_obj.origin_ruleset())
-            } else {
-                String::new()
-            }
-        } else {
-            String::new()
-        };
-
         let container_prefix = if let Some(container) = unique_container {
             format!("({}) {}'s", container.get_unique_target().name(), container.name())
         } else {
             "The".to_string()
         };
 
-        format!("{}{} unique ", origin_prefix, container_prefix)
+        format!("{} unique ", container_prefix)
     }
 }
 
@@ -647,7 +637,7 @@ mod tests {
         let prefix = UniqueValidator::get_unique_container_prefix(None);
         assert_eq!(prefix, "The unique ");
 
-        // Test with a container would require mocking IHasUniques and IRulesetObject
+        // Test with a container would require mocking IHasUniques
         // This is complex in a unit test, so we'll skip it for now
     }
 

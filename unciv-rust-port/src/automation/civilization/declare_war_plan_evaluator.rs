@@ -1,6 +1,7 @@
 use crate::{automation::civilization::motivation_to_attack_automation::MotivationToAttackAutomation, ranking_type::RankingType};
 use crate::civilization::civilization::Civilization;
 use crate::ai::personality::PersonalityValue;
+use crate::diplomacy::flags::DiplomacyFlags;
 
 use crate::diplomacy::status::DiplomaticStatus;
 use crate::diplomacy::relationship_level::RelationshipLevel;

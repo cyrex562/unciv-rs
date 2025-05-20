@@ -10,7 +10,6 @@ use crate::models::building::Building;
 use crate::models::unit::BaseUnit;
 use crate::models::ruleset::unique::UniqueType;
 use crate::models::ruleset::perpetual_construction::{PerpetualConstruction, PerpetualStatConversion};
-use crate::models::ruleset::IRulesetObject;
 use crate::ui::components::extensions::{darken, disable, is_enabled, to_checkbox, to_label, to_text_button};
 use crate::ui::components::input::{key_shortcuts, on_activation, onClick, KeyboardBinding};
 use crate::ui::fonts::Fonts;
@@ -81,7 +80,7 @@ impl ConstructionInfoTable {
         let mut portrait = ImageGetter::get_construction_portrait(&construction.name(), 50.0);
 
         // Add link to civilopedia if available
-        if let Some(ruleset_object) = construction.as_any().downcast_ref::<dyn IRulesetObject>() {
+        if let Some(ruleset_object) = construction.ruleset_object() {
             let link = ruleset_object.make_link();
             if !link.is_empty() {
                 portrait.on_click(move || {
@@ -106,7 +105,7 @@ impl ConstructionInfoTable {
         self.selected_construction_table.add(to_label(&building_text)).expand_x().row();
 
         // Add description
-        let description = match construction.as_any().type_name() {
+        let description = match construction.type_name() {
             t if t.contains("BaseUnit") => {
                 if let Some(unit) = construction.as_any().downcast_ref::<BaseUnit>() {
                     unit.get_description(city)

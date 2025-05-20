@@ -1,20 +1,6 @@
 use std::fmt;
 use std::collections::HashMap;
 
-use crate::models::ruleset::unique::{IHasUniques, Unique, UniqueMap};
-use crate::models::stats::NamedStats;
-use crate::models::ICivilopediaText;
-use crate::ui::screens::civilopediascreen::FormattedLine;
-
-/// Interface for objects that belong to a ruleset
-pub trait IRulesetObject: IHasUniques + ICivilopediaText {
-    /// The name of the ruleset this object belongs to
-    fn origin_ruleset(&self) -> &str;
-
-    /// Set the name of the ruleset this object belongs to
-    fn set_origin_ruleset(&mut self, origin: String);
-}
-
 /// Base class for ruleset objects
 pub struct RulesetObject {
     /// The name of this object
@@ -55,58 +41,6 @@ impl RulesetObject {
             map.insert(unique.unique_type, unique);
         }
         map
-    }
-}
-
-impl IHasUniques for RulesetObject {
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn set_name(&mut self, name: String) {
-        self.name = name;
-    }
-
-    fn uniques(&self) -> &[String] {
-        &self.uniques
-    }
-
-    fn uniques_mut(&mut self) -> &mut Vec<String> {
-        &mut self.uniques
-    }
-
-    fn unique_objects(&self) -> Vec<Unique> {
-        self.uniques.iter()
-            .map(|unique_str| Unique::from_string(unique_str))
-            .collect()
-    }
-
-    fn unique_map(&self) -> UniqueMap {
-        let mut map = HashMap::new();
-        for unique in self.unique_objects() {
-            map.insert(unique.unique_type, unique);
-        }
-        map
-    }
-}
-
-impl ICivilopediaText for RulesetObject {
-    fn civilopedia_text(&self) -> &[FormattedLine] {
-        &self.civilopedia_text
-    }
-
-    fn civilopedia_text_mut(&mut self) -> &mut Vec<FormattedLine> {
-        &mut self.civilopedia_text
-    }
-}
-
-impl IRulesetObject for RulesetObject {
-    fn origin_ruleset(&self) -> &str {
-        &self.origin_ruleset
-    }
-
-    fn set_origin_ruleset(&mut self, origin: String) {
-        self.origin_ruleset = origin;
     }
 }
 
@@ -156,58 +90,6 @@ impl RulesetStatsObject {
             map.insert(unique.unique_type, unique);
         }
         map
-    }
-}
-
-impl IHasUniques for RulesetStatsObject {
-    fn name(&self) -> &str {
-        self.stats.name()
-    }
-
-    fn set_name(&mut self, name: String) {
-        self.stats.set_name(name);
-    }
-
-    fn uniques(&self) -> &[String] {
-        &self.uniques
-    }
-
-    fn uniques_mut(&mut self) -> &mut Vec<String> {
-        &mut self.uniques
-    }
-
-    fn unique_objects(&self) -> Vec<Unique> {
-        self.uniques.iter()
-            .map(|unique_str| Unique::from_string(unique_str))
-            .collect()
-    }
-
-    fn unique_map(&self) -> UniqueMap {
-        let mut map = HashMap::new();
-        for unique in self.unique_objects() {
-            map.insert(unique.unique_type, unique);
-        }
-        map
-    }
-}
-
-impl ICivilopediaText for RulesetStatsObject {
-    fn civilopedia_text(&self) -> &[FormattedLine] {
-        &self.civilopedia_text
-    }
-
-    fn civilopedia_text_mut(&mut self) -> &mut Vec<FormattedLine> {
-        &mut self.civilopedia_text
-    }
-}
-
-impl IRulesetObject for RulesetStatsObject {
-    fn origin_ruleset(&self) -> &str {
-        &self.origin_ruleset
-    }
-
-    fn set_origin_ruleset(&mut self, origin: String) {
-        self.origin_ruleset = origin;
     }
 }
 

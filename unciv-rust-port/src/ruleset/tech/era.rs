@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::constants::FONTS;
 use crate::exceptions::UncivShowableException;
-use crate::models::ruleset::{IRulesetObject, Ruleset, RulesetObject};
+use crate::models::ruleset::{Ruleset, RulesetObject};
 use crate::models::ruleset::unique::{StateForConditionals, UniqueTarget, UniqueType};
 use crate::ui::components::color_from_rgb;
 use crate::ui::objectdescriptions::uniques_to_civilopedia_text_lines;
@@ -12,6 +12,7 @@ use crate::ui::screens::civilopediascreen::FormattedLine;
 /// Represents an era in the game
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Era {
+    pub ruleset_object: RulesetObject,
     /// The era number, used for sorting
     pub era_number: i32,
     /// Cost of research agreements in this era
@@ -60,6 +61,7 @@ impl Era {
     /// Creates a new Era with default values
     pub fn new() -> Self {
         Era {
+            ruleset_object: RulesetObject::default(),
             era_number: -1,
             research_agreement_cost: 300,
             starting_settler_count: 1,
@@ -145,7 +147,7 @@ impl Era {
     }
 
     /// Gets era-gated objects from the ruleset
-    fn get_era_gated_objects(&self, ruleset: &Ruleset) -> Vec<Box<dyn IRulesetObject>> {
+    fn get_era_gated_objects(&self, ruleset: &Ruleset) -> Vec<RulesetObject> {
         let era_conditionals = vec![
             UniqueType::ConditionalBeforeEra,
             UniqueType::ConditionalDuringEra,
@@ -158,7 +160,7 @@ impl Era {
         // Add policy branches from this era
         for branch in ruleset.policy_branches.values() {
             if branch.era == self.name {
-                result.push(Box::new(branch.clone()) as Box<dyn IRulesetObject>);
+                result.push(branch.clone());
             }
         }
 
@@ -171,13 +173,21 @@ impl Era {
 
             for unique in uniques {
                 if unique.modifiers.iter().any(|m| era_conditionals.contains(&m.unique_type)) {
-                    result.push(obj.clone_box());
+                    result.push(obj.clone());
                     break;
                 }
             }
         }
 
         result
+    }
+
+    pub fn origin_ruleset(&self) -> &str {
+        &self.ruleset_object.origin_ruleset
+    }
+
+    pub fn set_origin_ruleset(&mut self, origin: String) {
+        self.ruleset_object.origin_ruleset = origin;
     }
 }
 
