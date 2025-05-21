@@ -1,14 +1,8 @@
 use std::collections::HashMap;
 use regex::Regex;
-
-use crate::constants::Constants;
-use crate::city::CityConstructions;
-use crate::diplomacy::{DiplomacyFlags, DiplomacyManager};
-use crate::civilization::managers::TechManager;
-use crate::models::ruleset::{ModOptions, PerpetualConstruction, Ruleset};
 use crate::game_info::GameInfo;
 use crate::tile::Tile;
-use crate::unit::Unit;
+
 
 /// Container for all temporarily used code managing transitions from deprecated elements to their replacements.
 ///

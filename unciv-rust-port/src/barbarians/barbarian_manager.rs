@@ -1,11 +1,7 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 use rand::Rng;
-use crate::models::game_info::{GameInfo, Position};
 use crate::tile::tile::Tile;
-use crate::models::constants::Constants;
-use crate::models::ruleset::BaseUnit;
-use crate::models::civilization::{NotificationCategory, NotificationIcon};
-use crate::unique_type::UniqueType;
+
 
 /// Manages barbarian encampments and their spawning behavior.
 pub struct BarbarianManager {

@@ -1,7 +1,5 @@
-use crate::battle::battle::CombatAction;
 use crate::battle::i_combatant::ICombatant;
 use crate::city;
-use crate::logic::multi_filter::MultiFilter;
 
 use std::f32;
 use std::sync::Arc;
@@ -160,19 +158,19 @@ impl ICombatant for CityCombatant {
     fn is_air_unit(&self) -> bool {
         false
     }
-    
+
     fn is_water_unit(&self) -> bool {
         false
     }
-    
+
     fn is_land_unit(&self) -> bool {
         false
     }
-    
+
     fn is_city(&self) -> bool {
         true
     }
-    
+
     fn is_civilian(&self) -> bool {
         false
     }

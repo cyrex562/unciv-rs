@@ -1,10 +1,10 @@
 pub mod city_state_functions;
 pub mod city_state_personality;
 pub mod declare_war;
-mod flags;
+pub mod flags;
 pub mod functions;
 pub mod manager;
-mod modifiers;
+pub mod modifiers;
 pub mod status;
 pub mod turn_manager;
-mod relationship_level;
+pub mod relationship_level;

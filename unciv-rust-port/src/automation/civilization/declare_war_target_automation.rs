@@ -1,6 +1,10 @@
 
+use crate::civilization::civilization::Civilization;
+use crate::diplomacy::flags::DiplomacyFlags;
+use crate::diplomacy::relationship_level::RelationshipLevel;
 use crate::models::trade::{TradeLogic, TradeOffer, TradeRequest, TradeOfferType};
 use crate::automation::civilization::declare_war_plan_evaluator::DeclareWarPlanEvaluator;
+use crate::ranking_type::RankingType;
 
 /// Contains logic for choosing war targets and executing different war declaration strategies.
 pub struct DeclareWarTargetAutomation;

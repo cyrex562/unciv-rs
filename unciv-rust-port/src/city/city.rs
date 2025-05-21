@@ -33,7 +33,8 @@ pub struct City<'a> {
     pub civ: Option<Arc<Civilization>>,
 
     /// The center tile of the city (cached for better performance)
-    pub center_tile: Option<Arc<Tile>>,
+    /// The center tile position of the city (use position instead of Arc<Tile>)
+    pub center_tile_pos: Vector2<i32>,
 
     /// The tile map this city belongs to
     pub tile_map: Option<Arc<TileMap>>,
@@ -253,10 +254,7 @@ impl<'a> City<'a> {
         self.espionage.set_transients(Arc::new(self.clone()));
     }
 
-    /// Gets the center tile of the city
-    pub fn get_center_tile(&self) -> Arc<Tile> {
-        self.center_tile.as_ref().unwrap().clone()
-    }
+
 
     /// Gets the center tile of the city or null
     pub fn get_center_tile_or_null(&self) -> Option<Arc<Tile>> {
