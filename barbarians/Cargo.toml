@@ -1,0 +1,10 @@
+[package]
+name = "barbarians"
+version = "0.1.0"
+edition = "2021"
+
+
+
+[dependencies]
+rand = "0.9.1"
+map = { path = "../map" }

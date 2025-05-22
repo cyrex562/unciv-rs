@@ -1,2 +1,2 @@
 [workspace]
-members = ["unciv-rust-port"]
+members = [ "ai", "automation", "barbarians", "battle", "city", "civilization", "core", "diplomacy", "espionage", "main", "map", "mods", "multiplayer", "rules", "simulation", "trade", "ui", "units", "util"]

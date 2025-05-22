@@ -1,0 +1,10 @@
+[package]
+name = "core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.98"
+rand = "0.9.1"
+regex = "1.11.1"
+tokio = "1.45.0"
