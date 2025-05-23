@@ -1,27 +1,29 @@
 // Source: orig_src/core/src/com/unciv/logic/files/UncivFiles.kt
 // Ported to Rust
 
-use std::path::{Path, PathBuf};
-use std::fs::{self, File, OpenOptions};
-use std::io::{self, Read, Write};
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
+use serde::{Deserialize, Serialize};
+use serde_json;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
-use serde::{Serialize, Deserialize};
-use serde_json;
+use std::fs::{self, File, OpenOptions};
+use std::io::{self, Read, Write};
+use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
-use crate::unciv_game::UncivGame;
-use crate::utils::gzip::Gzip;
-use crate::utils::file_chooser::FileHandle;
+use crate::logic::compatibility_version::CompatibilityVersion;
+use crate::logic::game_info::{
+    GameInfo, GameInfoPreview, GameInfoSerializationVersion, HasGameInfoSerializationVersion,
+};
 use crate::models::metadata::{GameSettings, ModUIData};
 use crate::models::ruleset::RulesetCache;
-use crate::logic::game_info::{GameInfo, GameInfoPreview, GameInfoSerializationVersion, HasGameInfoSerializationVersion};
-use crate::logic::compatibility_version::CompatibilityVersion;
+use crate::unciv_game::UncivGame;
 use crate::utils::concurrency::Concurrency;
-use crate::utils::log::Log;
 use crate::utils::debug;
+use crate::utils::file_chooser::FileHandle;
+use crate::utils::gzip::Gzip;
+use crate::utils::log::Log;
 
 /// Constants for file paths and names
 const SAVE_FILES_FOLDER: &str = "SaveFiles";
@@ -59,15 +61,18 @@ pub trait Files: Send + Sync {
 impl UncivFiles {
     /// Create a new UncivFiles instance
     pub fn new(files: Arc<dyn Files>, custom_data_directory: Option<String>) -> Self {
-        debug!("Creating UncivFiles, localStoragePath: {}, externalStoragePath: {}",
-            files.local_storage_path(), files.external_storage_path());
+        debug!(
+            "Creating UncivFiles, localStoragePath: {}, externalStoragePath: {}",
+            files.local_storage_path(),
+            files.external_storage_path()
+        );
 
         let unciv_files = UncivFiles {
             files,
             custom_data_directory,
             autosaves: Autosaves::new(Arc::new(UncivFiles::new(
                 Arc::new(DefaultFiles::new()),
-                None
+                None,
             ))),
         };
 
@@ -117,17 +122,24 @@ impl UncivFiles {
 
     /// Internal method to get a save file handle
     fn get_save_internal(&self, save_folder: &str, game_name: &str) -> FileHandle {
-        debug!("Getting save {} from folder {}, preferExternal: {}, externalStoragePath: {}",
-            game_name, save_folder, SAVE_ZIPPED.load(Ordering::Relaxed), self.files.external_storage_path());
+        debug!(
+            "Getting save {} from folder {}, preferExternal: {}, externalStoragePath: {}",
+            game_name,
+            save_folder,
+            SAVE_ZIPPED.load(Ordering::Relaxed),
+            self.files.external_storage_path()
+        );
 
         let location = format!("{}/{}", save_folder, game_name);
         let local_file = self.get_local_file(&location);
         let external_file = self.files.external(&location);
 
-        let to_return = if self.files.is_external_storage_available() && (
-            external_file.exists() && !local_file.exists() || // external file is only valid choice
-            PREFER_EXTERNAL_STORAGE.load(Ordering::Relaxed) && (external_file.exists() || !local_file.exists()) // unless local file is only valid choice, choose external
-        ) {
+        let to_return = if self.files.is_external_storage_available()
+            && (
+                external_file.exists() && !local_file.exists() || // external file is only valid choice
+            PREFER_EXTERNAL_STORAGE.load(Ordering::Relaxed) && (external_file.exists() || !local_file.exists())
+                // unless local file is only valid choice, choose external
+            ) {
             external_file
         } else {
             local_file
@@ -145,7 +157,9 @@ impl UncivFiles {
 
     /// Convert a path to a file handle
     pub fn path_to_file_handler(&self, path: &str) -> FileHandle {
-        if PREFER_EXTERNAL_STORAGE.load(Ordering::Relaxed) && self.files.is_external_storage_available() {
+        if PREFER_EXTERNAL_STORAGE.load(Ordering::Relaxed)
+            && self.files.is_external_storage_available()
+        {
             self.files.external(path)
         } else {
             self.get_local_file(path)
@@ -164,7 +178,8 @@ impl UncivFiles {
         if auto_saves {
             saves
         } else {
-            saves.into_iter()
+            saves
+                .into_iter()
                 .filter(|file| !file.name().starts_with(AUTOSAVE_FILE_NAME))
                 .collect()
         }
@@ -172,21 +187,27 @@ impl UncivFiles {
 
     /// Internal method to get saves from a folder
     fn get_saves_internal(&self, save_folder: &str) -> Vec<FileHandle> {
-        debug!("Getting saves from folder {}, externalStoragePath: {}",
-            save_folder, self.files.external_storage_path());
+        debug!(
+            "Getting saves from folder {}, externalStoragePath: {}",
+            save_folder,
+            self.files.external_storage_path()
+        );
 
         let local_files = self.get_local_file(save_folder).list().unwrap_or_default();
 
-        let external_files = if self.files.is_external_storage_available() &&
-            self.get_data_folder().path() != self.files.external("").path() {
+        let external_files = if self.files.is_external_storage_available()
+            && self.get_data_folder().path() != self.files.external("").path()
+        {
             self.files.external(save_folder).list().unwrap_or_default()
         } else {
             Vec::new()
         };
 
-        debug!("Local files: {:?}, external files: {:?}",
+        debug!(
+            "Local files: {:?}, external files: {:?}",
             local_files.iter().map(|f| f.path()).collect::<Vec<_>>(),
-            external_files.iter().map(|f| f.path()).collect::<Vec<_>>());
+            external_files.iter().map(|f| f.path()).collect::<Vec<_>>()
+        );
 
         let mut result = local_files;
         result.extend(external_files);
@@ -205,16 +226,24 @@ impl UncivFiles {
     }
 
     /// Save a game by name
-    pub fn save_game(&self, game: &GameInfo, game_name: &str,
-                    save_completion_callback: impl FnOnce(Option<&dyn Error>) + Send + 'static) -> FileHandle {
+    pub fn save_game(
+        &self,
+        game: &GameInfo,
+        game_name: &str,
+        save_completion_callback: impl FnOnce(Option<&dyn Error>) + Send + 'static,
+    ) -> FileHandle {
         let file = self.get_save(game_name);
         self.save_game_to_file(game, &file, save_completion_callback);
         file
     }
 
     /// Save a game to a file
-    pub fn save_game_to_file(&self, game: &GameInfo, file: &FileHandle,
-                            save_completion_callback: impl FnOnce(Option<&dyn Error>) + Send + 'static) {
+    pub fn save_game_to_file(
+        &self,
+        game: &GameInfo,
+        file: &FileHandle,
+        save_completion_callback: impl FnOnce(Option<&dyn Error>) + Send + 'static,
+    ) {
         match self.save_game_internal(game, file) {
             Ok(_) => save_completion_callback(None),
             Err(e) => save_completion_callback(Some(&e)),
@@ -222,16 +251,24 @@ impl UncivFiles {
     }
 
     /// Save a game preview by name
-    pub fn save_game_preview(&self, game: &GameInfoPreview, game_name: &str,
-                           save_completion_callback: impl FnOnce(Option<&dyn Error>) + Send + 'static) -> FileHandle {
+    pub fn save_game_preview(
+        &self,
+        game: &GameInfoPreview,
+        game_name: &str,
+        save_completion_callback: impl FnOnce(Option<&dyn Error>) + Send + 'static,
+    ) -> FileHandle {
         let file = self.get_multiplayer_save(game_name);
         self.save_game_preview_to_file(game, &file, save_completion_callback);
         file
     }
 
     /// Save a game preview to a file
-    pub fn save_game_preview_to_file(&self, game: &GameInfoPreview, file: &FileHandle,
-                                   save_completion_callback: impl FnOnce(Option<&dyn Error>) + Send + 'static) {
+    pub fn save_game_preview_to_file(
+        &self,
+        game: &GameInfoPreview,
+        file: &FileHandle,
+        save_completion_callback: impl FnOnce(Option<&dyn Error>) + Send + 'static,
+    ) {
         match self.save_game_preview_internal(game, file) {
             Ok(_) => save_completion_callback(None),
             Err(e) => save_completion_callback(Some(&e)),
@@ -239,31 +276,41 @@ impl UncivFiles {
     }
 
     /// Save a game to a custom location
-    pub fn save_game_to_custom_location(&self, game: &mut GameInfo, game_name: &str,
-                                      on_saved: impl FnOnce() + Send + 'static,
-                                      on_error: impl FnOnce(&dyn Error) + Send + 'static) {
+    pub fn save_game_to_custom_location(
+        &self,
+        game: &mut GameInfo,
+        game_name: &str,
+        on_saved: impl FnOnce() + Send + 'static,
+        on_error: impl FnOnce(&dyn Error) + Send + 'static,
+    ) {
         let save_location = game.custom_save_location.clone().unwrap_or_else(|| {
-            UncivGame::current().files().get_local_file(game_name).path()
+            UncivGame::current()
+                .files()
+                .get_local_file(game_name)
+                .path()
         });
 
         match Self::game_info_to_string(game, None, false) {
             Ok(data) => {
-                debug!("Initiating UI to save GameInfo {} to custom location {}", game.game_id, save_location);
+                debug!(
+                    "Initiating UI to save GameInfo {} to custom location {}",
+                    game.game_id, save_location
+                );
 
                 SAVER_LOADER.load(Ordering::Relaxed).save_game(
                     &data,
                     &save_location,
                     move |location| {
                         game.custom_save_location = Some(location.to_string());
-                        Concurrency::run_on_main_thread(on_saved);
+                        on_saved();
                     },
                     move |error| {
-                        Concurrency::run_on_main_thread(move || on_error(error));
-                    }
+                        on_error(error);
+                    },
                 );
-            },
+            }
             Err(e) => {
-                Concurrency::run_on_main_thread(move || on_error(&e));
+                on_error(&e);
             }
         }
     }
@@ -285,7 +332,10 @@ impl UncivFiles {
     }
 
     /// Load a game preview from a file
-    pub fn load_game_preview_from_file(&self, game_file: &FileHandle) -> io::Result<GameInfoPreview> {
+    pub fn load_game_preview_from_file(
+        &self,
+        game_file: &FileHandle,
+    ) -> io::Result<GameInfoPreview> {
         match serde_json::from_reader(game_file.reader()?) {
             Ok(preview) => Ok(preview),
             Err(_) => Err(self.empty_file(game_file)),
@@ -296,29 +346,29 @@ impl UncivFiles {
     fn empty_file(&self, game_file: &FileHandle) -> io::Error {
         io::Error::new(
             io::ErrorKind::InvalidData,
-            format!("The file for the game {} is empty", game_file.name())
+            format!("The file for the game {} is empty", game_file.name()),
         )
     }
 
     /// Load a game from a custom location
-    pub fn load_game_from_custom_location(&self,
-                                        on_loaded: impl FnOnce(&GameInfo) + Send + 'static,
-                                        on_error: impl FnOnce(&dyn Error) + Send + 'static) {
+    pub fn load_game_from_custom_location(
+        &self,
+        on_loaded: impl FnOnce(&GameInfo) + Send + 'static,
+        on_error: impl FnOnce(&dyn Error) + Send + 'static,
+    ) {
         SAVER_LOADER.load(Ordering::Relaxed).load_game(
-            move |data, location| {
-                match Self::game_info_from_string(data) {
-                    Ok(mut game) => {
-                        game.custom_save_location = Some(location.to_string());
-                        Concurrency::run_on_main_thread(move || on_loaded(&game));
-                    },
-                    Err(e) => {
-                        Concurrency::run_on_main_thread(move || on_error(&e));
-                    }
+            move |data, location| match Self::game_info_from_string(data) {
+                Ok(mut game) => {
+                    game.custom_save_location = Some(location.to_string());
+                    on_loaded(&game);
+                }
+                Err(e) => {
+                    on_error(&e);
                 }
             },
             move |error| {
-                Concurrency::run_on_main_thread(move || on_error(error));
-            }
+                on_error(error);
+            },
         );
     }
 
@@ -343,7 +393,7 @@ impl UncivFiles {
                         // settings.do_migrations(JsonReader().parse(settings_file))
                     }
                     settings
-                },
+                }
                 Err(e) => {
                     Log::error("Error reading settings file", &e);
                     GameSettings::default()
@@ -413,7 +463,11 @@ impl UncivFiles {
     }
 
     /// Convert a game info to a string
-    pub fn game_info_to_string(game: &GameInfo, force_zip: Option<bool>, update_checksum: bool) -> io::Result<String> {
+    pub fn game_info_to_string(
+        game: &GameInfo,
+        force_zip: Option<bool>,
+        update_checksum: bool,
+    ) -> io::Result<String> {
         let mut game_clone = game.clone();
         game_clone.version = GameInfo::CURRENT_COMPATIBILITY_VERSION;
 
@@ -450,24 +504,27 @@ impl UncivFiles {
                 if game_info.version > GameInfo::CURRENT_COMPATIBILITY_VERSION {
                     return Err(io::Error::new(
                         io::ErrorKind::InvalidData,
-                        IncompatibleGameInfoVersionException::new(game_info.version, None)
+                        IncompatibleGameInfoVersionException::new(game_info.version, None),
                     ));
                 }
 
                 game_info.set_transients();
                 Ok(game_info)
-            },
+            }
             Err(e) => {
                 Log::error("Exception while deserializing GameInfo JSON", &e);
 
                 match serde_json::from_str::<GameInfoSerializationVersion>(&unzipped_json) {
                     Ok(version) => Err(io::Error::new(
                         io::ErrorKind::InvalidData,
-                        IncompatibleGameInfoVersionException::new(version.version, Some(Box::new(e)))
+                        IncompatibleGameInfoVersionException::new(
+                            version.version,
+                            Some(Box::new(e)),
+                        ),
                     )),
                     Err(_) => Err(io::Error::new(
                         io::ErrorKind::InvalidData,
-                        "The file data seems to be corrupted."
+                        "The file data seems to be corrupted.",
                     )),
                 }
             }
@@ -482,7 +539,12 @@ impl UncivFiles {
 
     /// Get settings for platform launchers
     pub fn get_settings_for_platform_launchers(base_directory: &str) -> GameSettings {
-        let file = FileHandle::new(&format!("{}{}{}", base_directory, std::path::MAIN_SEPARATOR, SETTINGS_FILE_NAME));
+        let file = FileHandle::new(&format!(
+            "{}{}{}",
+            base_directory,
+            std::path::MAIN_SEPARATOR,
+            SETTINGS_FILE_NAME
+        ));
 
         if file.exists() {
             match serde_json::from_reader(file.reader().unwrap()) {
@@ -544,36 +606,37 @@ impl Files for DefaultFiles {
 /// Autosaves manager
 pub struct Autosaves {
     files: Arc<UncivFiles>,
-    auto_save_job: Option<Arc<Concurrency::Job>>,
 }
 
 impl Autosaves {
     /// Create a new Autosaves instance
     pub fn new(files: Arc<UncivFiles>) -> Self {
-        Autosaves {
-            files,
-            auto_save_job: None,
-        }
+        Autosaves { files }
     }
 
     /// Request an autosave
-    pub fn request_auto_save(&mut self, game_info: &GameInfo, next_turn: bool) -> Arc<Concurrency::Job> {
+    pub fn request_auto_save(
+        &mut self,
+        game_info: &GameInfo,
+        next_turn: bool,
+    ) -> Arc<Concurrency::Job> {
         // Clone the game info to avoid concurrent modification issues
         let game_clone = game_info.clone();
         self.request_auto_save_uncloned(&game_clone, next_turn)
     }
 
     /// Request an autosave without cloning
-    pub fn request_auto_save_uncloned(&mut self, game_info: &GameInfo, next_turn: bool) -> Arc<Concurrency::Job> {
+    pub fn request_auto_save_uncloned(
+        &mut self,
+        game_info: &GameInfo,
+        next_turn: bool,
+    ) -> Arc<Concurrency::Job> {
         let files = Arc::clone(&self.files);
         let game_clone = game_info.clone();
 
-        let job = Concurrency::run("autoSaveUnCloned", move || {
+        let _ = std::thread::spawn(move || {
             files.autosaves.auto_save(&game_clone, next_turn);
         });
-
-        self.auto_save_job = Some(Arc::clone(&job));
-        job
     }
 
     /// Perform an autosave
@@ -582,7 +645,7 @@ impl Autosaves {
         let settings = self.files.get_general_settings();
 
         match self.files.save_game(game_info, AUTOSAVE_FILE_NAME, |_| {}) {
-            Ok(_) => {},
+            Ok(_) => {}
             Err(e) => {
                 Log::error("Ran out of memory during autosave", &e);
                 return; // not much we can do here
@@ -591,9 +654,14 @@ impl Autosaves {
 
         // Keep auto-saves for the last N turns for debugging purposes
         if next_turn {
-            let new_autosave_filename = format!("{}{}{}-{}-{}",
-                SAVE_FILES_FOLDER, std::path::MAIN_SEPARATOR,
-                AUTOSAVE_FILE_NAME, game_info.current_player, game_info.turns);
+            let new_autosave_filename = format!(
+                "{}{}{}-{}-{}",
+                SAVE_FILES_FOLDER,
+                std::path::MAIN_SEPARATOR,
+                AUTOSAVE_FILE_NAME,
+                game_info.current_player,
+                game_info.turns
+            );
 
             let file = self.files.path_to_file_handler(&new_autosave_filename);
 
@@ -608,8 +676,7 @@ impl Autosaves {
 
             // Add 1 to avoid player choosing 6,11,21,51,101, etc.. in options
             while autosaves.len() > settings.max_autosaves_stored + 1 {
-                if let Some(save_to_delete) = autosaves.iter()
-                    .min_by_key(|f| f.last_modified()) {
+                if let Some(save_to_delete) = autosaves.iter().min_by_key(|f| f.last_modified()) {
                     if let Err(e) = self.files.delete_save(save_to_delete.name()) {
                         Log::error("Failed to delete old autosave", &e);
                     }
@@ -620,7 +687,8 @@ impl Autosaves {
 
     /// Get all autosaves
     fn get_autosaves(&self) -> Vec<FileHandle> {
-        self.files.get_saves(true)
+        self.files
+            .get_saves(true)
             .into_iter()
             .filter(|f| f.name().starts_with(AUTOSAVE_FILE_NAME))
             .collect()
@@ -633,16 +701,22 @@ impl Autosaves {
             Err(_) => {
                 // Silent fail if we can't read the autosave for any reason
                 // Try to load the last autosave by turn number
-                let autosaves = self.files.get_saves(true)
+                let autosaves = self
+                    .files
+                    .get_saves(true)
                     .into_iter()
-                    .filter(|f| f.name() != AUTOSAVE_FILE_NAME && f.name().starts_with(AUTOSAVE_FILE_NAME))
+                    .filter(|f| {
+                        f.name() != AUTOSAVE_FILE_NAME && f.name().starts_with(AUTOSAVE_FILE_NAME)
+                    })
                     .collect::<Vec<_>>();
 
-                if let Some(latest) = autosaves.iter()
-                    .max_by_key(|f| f.last_modified()) {
+                if let Some(latest) = autosaves.iter().max_by_key(|f| f.last_modified()) {
                     self.files.load_game_from_file(latest)
                 } else {
-                    Err(io::Error::new(io::ErrorKind::NotFound, "No autosaves found"))
+                    Err(io::Error::new(
+                        io::ErrorKind::NotFound,
+                        "No autosaves found",
+                    ))
                 }
             }
         }

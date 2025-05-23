@@ -45,7 +45,7 @@ pub const SKIN: &str = "Minimal";
 pub const FALLBACK_SKIN: &str = "Minimal";
 
 pub const ATLAS: &str = "game.atlas";
-pub const SKIN: &str = "skin/skin.json";
+pub const SKIN_JSON: &str = "skin/skin.json";
 pub const FONT: &str = "fonts/OpenSans-Regular.ttf";
 
 pub const MODS: &str = "mods";

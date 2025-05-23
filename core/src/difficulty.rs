@@ -1,11 +1,5 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::ptr::Unique;
-use crate::models::ruleset::Ruleset;
-use crate::models::ruleset::unique::Unique;
-use crate::models::stats::INamed;
-use crate::ui::components::fonts::Fonts;
-use crate::ui::screens::civilopedia_screen::{FormattedLine, ICivilopediaText};
 
 /// Represents game difficulty settings
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -65,7 +59,7 @@ pub struct Difficulty {
     /// Gold reward for clearing barbarian camps
     pub clear_barbarian_camp_reward: i32,
     /// Civilopedia text
-    pub civilopedia_text: Vec<FormattedLine>,
+    pub civilopedia_text: Vec<String>,
 }
 
 impl Difficulty {
@@ -109,291 +103,18 @@ impl Difficulty {
     }
 }
 
-impl INamed for Difficulty {
-    fn get_name(&self) -> &str {
-        &self.name
-    }
 
-    fn set_name(&mut self, name: String) {
-        self.name = name;
-    }
-}
 
 impl ICivilopediaText for Difficulty {
     fn make_link(&self) -> String {
         format!("Difficulty/{}", self.name)
     }
 
-    fn get_civilopedia_text_lines(&self, ruleset: &Ruleset) -> Vec<FormattedLine> {
-        let mut lines = Vec::new();
-
-        // Player settings
-        lines.push(FormattedLine::new("Player settings", 3, 0));
-        lines.push(FormattedLine::new(
-            format!("{{Base happiness}}: {} {}", self.base_happiness, Fonts::HAPPINESS),
-            0,
-            1,
-        ));
-        lines.push(FormattedLine::new(
-            format!(
-                "{{Extra happiness per luxury}}: {} {}",
-                self.extra_happiness_per_luxury as i32,
-                Fonts::HAPPINESS
-            ),
-            0,
-            1,
-        ));
-        lines.push(FormattedLine::new(
-            format!(
-                "{{Research cost modifier}}: {}% {}",
-                Self::to_percent(self.research_cost_modifier),
-                Fonts::SCIENCE
-            ),
-            0,
-            1,
-        ));
-        lines.push(FormattedLine::new(
-            format!(
-                "{{Unit cost modifier}}: {}% {}",
-                Self::to_percent(self.unit_cost_modifier),
-                Fonts::PRODUCTION
-            ),
-            0,
-            1,
-        ));
-        lines.push(FormattedLine::new(
-            format!(
-                "{{Building cost modifier}}: {}% {}",
-                Self::to_percent(self.building_cost_modifier),
-                Fonts::PRODUCTION
-            ),
-            0,
-            1,
-        ));
-        lines.push(FormattedLine::new(
-            format!(
-                "{{Policy cost modifier}}: {}% {}",
-                Self::to_percent(self.policy_cost_modifier),
-                Fonts::CULTURE
-            ),
-            0,
-            1,
-        ));
-        lines.push(FormattedLine::new(
-            format!(
-                "{{Unhappiness modifier}}: {}%",
-                Self::to_percent(self.unhappiness_modifier)
-            ),
-            0,
-            1,
-        ));
-        lines.push(FormattedLine::new(
-            format!(
-                "{{Bonus vs. Barbarians}}: {}% {}",
-                Self::to_percent(self.barbarian_bonus),
-                Fonts::STRENGTH
-            ),
-            0,
-            1,
-        ));
-        lines.push(FormattedLine::new(
-            format!("{{Barbarian spawning delay}}: {}", self.barbarian_spawn_delay),
-            0,
-            1,
-        ));
-
-        // Player bonus starting units
-        if !self.player_bonus_starting_units.is_empty() {
-            lines.push(FormattedLine::new("", 0, 0));
-            lines.push(FormattedLine::new("{Bonus starting units}:", 0, 1));
-            let unit_counts: HashMap<&String, usize> = self
-                .player_bonus_starting_units
-                .iter()
-                .fold(HashMap::new(), |mut map, unit| {
-                    *map.entry(unit).or_insert(0) += 1;
-                    map
-                });
-            for (unit, count) in unit_counts {
-                let text = if count == 1 {
-                    format!("[{}]", unit)
-                } else {
-                    format!("{} [{}]", count, unit)
-                };
-                lines.push(FormattedLine::new(
-                    Unique::new(text, None, None),
-                    0,
-                    2,
-                ));
-            }
-        }
-
-        // AI settings
-        lines.push(FormattedLine::new("", 0, 0));
-        lines.push(FormattedLine::new("AI settings", 3, 0));
-        if let Some(level) = &self.ai_difficulty_level {
-            lines.push(FormattedLine::new(
-                format!("{{AI difficulty level}}: {}", level),
-                0,
-                1,
-            ));
-        }
-        lines.push(FormattedLine::new(
-            format!(
-                "{{AI city growth modifier}}: {}% {}",
-                Self::to_percent(self.ai_city_growth_modifier),
-                Fonts::FOOD
-            ),
-            0,
-            1,
-        ));
-        lines.push(FormattedLine::new(
-            format!(
-                "{{AI unit cost modifier}}: {}% {}",
-                Self::to_percent(self.ai_unit_cost_modifier),
-                Fonts::PRODUCTION
-            ),
-            0,
-            1,
-        ));
-        lines.push(FormattedLine::new(
-            format!(
-                "{{AI building cost modifier}}: {}% {}",
-                Self::to_percent(self.ai_building_cost_modifier),
-                Fonts::PRODUCTION
-            ),
-            0,
-            1,
-        ));
-        lines.push(FormattedLine::new(
-            format!(
-                "{{AI wonder cost modifier}}: {}% {}",
-                Self::to_percent(self.ai_wonder_cost_modifier),
-                Fonts::PRODUCTION
-            ),
-            0,
-            1,
-        ));
-        lines.push(FormattedLine::new(
-            format!(
-                "{{AI building maintenance modifier}}: {}% {}",
-                Self::to_percent(self.ai_building_maintenance_modifier),
-                Fonts::GOLD
-            ),
-            0,
-            1,
-        ));
-        lines.push(FormattedLine::new(
-            format!(
-                "{{AI unit maintenance modifier}}: {}% {}",
-                Self::to_percent(self.ai_unit_maintenance_modifier),
-                Fonts::GOLD
-            ),
-            0,
-            1,
-        ));
-        lines.push(FormattedLine::new(
-            format!(
-                "{{AI unhappiness modifier}}: {}%",
-                Self::to_percent(self.ai_unhappiness_modifier)
-            ),
-            0,
-            1,
-        ));
-
-        // AI free techs
-        if !self.ai_free_techs.is_empty() {
-            lines.push(FormattedLine::new("", 0, 0));
-            lines.push(FormattedLine::new("{AI free techs}:", 0, 1));
-            for tech in &self.ai_free_techs {
-                lines.push(FormattedLine::new_with_link(
-                    tech.clone(),
-                    format!("Technology/{}", tech),
-                    0,
-                    2,
-                ));
-            }
-        }
-
-        // AI major civ bonus starting units
-        if !self.ai_major_civ_bonus_starting_units.is_empty() {
-            lines.push(FormattedLine::new("", 0, 0));
-            lines.push(FormattedLine::new(
-                "{Major AI civilization bonus starting units}:",
-                0,
-                1,
-            ));
-            let unit_counts: HashMap<&String, usize> = self
-                .ai_major_civ_bonus_starting_units
-                .iter()
-                .fold(HashMap::new(), |mut map, unit| {
-                    *map.entry(unit).or_insert(0) += 1;
-                    map
-                });
-            for (unit, count) in unit_counts {
-                let text = if count == 1 {
-                    format!("[{}]", unit)
-                } else {
-                    format!("{} [{}]", count, unit)
-                };
-                lines.push(FormattedLine::new(
-                    Unique::new(text, None, None),
-                    0,
-                    2,
-                ));
-            }
-        }
-
-        // AI city state bonus starting units
-        if !self.ai_city_state_bonus_starting_units.is_empty() {
-            lines.push(FormattedLine::new("", 0, 0));
-            lines.push(FormattedLine::new(
-                "{City state bonus starting units}:",
-                0,
-                1,
-            ));
-            let unit_counts: HashMap<&String, usize> = self
-                .ai_city_state_bonus_starting_units
-                .iter()
-                .fold(HashMap::new(), |mut map, unit| {
-                    *map.entry(unit).or_insert(0) += 1;
-                    map
-                });
-            for (unit, count) in unit_counts {
-                let text = if count == 1 {
-                    format!("[{}]", unit)
-                } else {
-                    format!("{} [{}]", count, unit)
-                };
-                lines.push(FormattedLine::new(
-                    Unique::new(text, None, None),
-                    0,
-                    2,
-                ));
-            }
-        }
-
-        // Barbarian settings
-        lines.push(FormattedLine::new("", 0, 0));
-        lines.push(FormattedLine::new(
-            format!(
-                "{{Turns until barbarians enter player tiles}}: {} {}",
-                self.turn_barbarians_can_enter_player_tiles,
-                Fonts::TURN
-            ),
-            0,
-            0,
-        ));
-        lines.push(FormattedLine::new(
-            format!(
-                "{{Gold reward for clearing barbarian camps}}: {} {}",
-                self.clear_barbarian_camp_reward,
-                Fonts::GOLD
-            ),
-            0,
-            0,
-        ));
-
-        lines
+    fn get_civilopedia_text_lines(&self, _ruleset: &Ruleset) -> Vec<FormattedLine> {
+        self.civilopedia_text
+            .iter()
+            .map(|line| FormattedLine::new(line.clone(), 0, 0))
+            .collect()
     }
 }
 

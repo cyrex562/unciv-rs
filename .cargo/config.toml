@@ -1,2 +1,2 @@
 [build]
-rustflags = ["-C", "incremental=1"]
+rustflags = ["-C", "incremental=incremental-data"]
