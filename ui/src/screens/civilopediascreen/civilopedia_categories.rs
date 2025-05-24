@@ -229,8 +229,8 @@ impl CivilopediaCategories {
             },
             CivilopediaCategories::Difficulty => {
                 ruleset.difficulties.values()
-                    .map(|d| Box::new(d.clone()) as Box<dyn ICivilopediaText>)
-                    .collect()
+                    .cloned()
+                    .collect::<Vec<_>>()
             },
             CivilopediaCategories::Era => {
                 ruleset.eras.values()

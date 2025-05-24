@@ -1,2 +1,2 @@
 [workspace]
-members = [ "ai", "automation", "barbarians", "battle", "city", "civilization", "core", "diplomacy", "espionage", "main", "map", "mods", "multiplayer", "rules", "simulation", "trade", "ui", "units", "util"]
+members = [ "ai", "automation", "barbarians", "battle", "city", "civilization", "unciv_core", "diplomacy", "espionage", "main", "map", "mods", "multiplayer", "rules", "simulation", "trade", "ui", "units", "util"]

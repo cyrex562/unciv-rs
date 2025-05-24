@@ -1,7 +1,10 @@
 use rand::Rng;
 use std::cmp::min;
 use std::collections::{HashMap, HashSet};
-use core::unique::unique_type::UniqueType;
+use unciv_core::unique::unique_type::UniqueType;
+use faction::civilization::Civilization;
+use units::unit::Unit;
+use city::city::City;
 
 /// Class containing city-state-specific functions
 // pub struct CityStateFunctions<'a> {
@@ -60,7 +63,7 @@ pub fn init_city_state(
 
     // Unique unit for militaristic city-states
     if unique_types.contains(&UniqueType::CityStateMilitaryUnits) {
-        let possible_units: Vec<&BaseUnit> = ruleset
+        let possible_units: Vec<&Unit> = ruleset
             .units
             .values()
             .filter(|it| {
@@ -213,7 +216,7 @@ pub fn turns_for_great_person_from_city_state(&self) -> i32 {
 /// Gain a random great person from the city state
 pub fn give_great_person_to_patron(&self, receiving_civ: &mut Civilization) {
     // Great Prophets can't be gotten from CS
-    let giftable_units: Vec<&BaseUnit> = self
+    let giftable_units: Vec<&Unit> = self
         .civ_info
         .game_info
         .ruleset
@@ -268,7 +271,7 @@ pub fn give_military_unit_to_patron(&self, receiving_civ: &mut Civilization) {
     fn giftable_unique_unit(
         civ_info: &Civilization,
         receiving_civ: &Civilization,
-    ) -> Option<&BaseUnit> {
+    ) -> Option<&Unit> {
         let unique_unit = civ_info
             .game_info
             .ruleset
@@ -283,7 +286,7 @@ pub fn give_military_unit_to_patron(&self, receiving_civ: &mut Civilization) {
         Some(unique_unit)
     }
 
-    fn random_giftable_unit(city: &City, receiving_civ: &Civilization) -> Option<&BaseUnit> {
+    fn random_giftable_unit(city: &City, receiving_civ: &Civilization) -> Option<&Unit> {
         city.city_constructions
             .get_constructable_units()
             .filter(|it| !it.is_civilian() && it.is_land_unit && it.unique_to.is_none())
@@ -880,7 +883,7 @@ pub fn tribute_worker(&self, demanding_civ: &mut Civilization) {
         panic!("You can only demand workers from City-States!");
     }
 
-    let buildable_worker_like_units: Vec<&BaseUnit> = self
+    let buildable_worker_like_units: Vec<&Unit> = self
         .civ_info
         .game_info
         .ruleset

@@ -5,4 +5,4 @@ edition = "2021"
 
 [dependencies]
 serde = "1.0.219"
-core = { path = "../core" }
+unciv_core = { path = "../unciv_core" }

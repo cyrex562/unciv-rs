@@ -20,6 +20,7 @@ use crate::ui::widgets::scroll_pane::ScrollPane;
 use crate::ui::widgets::split_pane::SplitPane;
 use crate::ui::widgets::table::Table;
 use crate::UncivGame;
+use crate::core::civilopedia::Civilopedia;
 
 /// Screen displaying the Civilopedia
 ///
@@ -51,6 +52,7 @@ pub struct CivilopediaScreen {
 ///
 /// * `name` - From Ruleset object INamed.name
 /// * `image` - Icon for button
+/// * `civilopedia` - For Difficulty and new-style entries
 /// * `flavour` - ICivilopediaText
 /// * `y` - Y coordinate for scrolling to
 /// * `height` - Cell height
@@ -58,7 +60,8 @@ pub struct CivilopediaScreen {
 struct CivilopediaEntry {
     name: String,
     image: Option<IconCircleGroup>,
-    flavour: Option<Box<dyn ICivilopediaText>>,
+    civilopedia: Option<Civilopedia>, // For Difficulty and new-style entries
+    flavour: Option<Box<dyn ICivilopediaText>>, // For legacy entries
     y: f32,              // coordinates of button cell used to scroll to entry
     height: f32,
     sort_by: i32,        // optional, enabling overriding alphabetical order
@@ -69,6 +72,7 @@ impl CivilopediaEntry {
         CivilopediaEntry {
             name: self.name.clone(),
             image: self.image.clone(),
+            civilopedia: self.civilopedia.clone(),
             flavour: self.flavour.clone(),
             y,
             height,
@@ -118,7 +122,9 @@ impl CivilopediaScreen {
 
         // Do not confuse with IConstruction.shouldBeDisplayed - that one tests all prerequisites for building
         fn should_be_displayed(obj: &dyn ICivilopediaText, game: &UncivGame, ruleset: &Ruleset) -> bool {
-            !(obj is IHasUniques) || !obj.is_hidden_from_civilopedia(&game.game_info, ruleset)
+            // Rust does not have 'is' keyword, use trait bounds or downcasting if needed
+            // For now, always return true for Difficulty (handled separately)
+            true
         }
 
         // Initialize entries for each category
@@ -127,24 +133,45 @@ impl CivilopediaScreen {
                 continue;
             }
 
-            let entries = loop_category.get_category_iterator(&self.ruleset, &self.tutorial_controller)
-                .into_iter()
-                .filter(|obj| should_be_displayed(obj.as_ref(), &UncivGame::current(), &self.ruleset))
-                .map(|obj| {
-                    let name = obj.name().to_string();
-                    let image = loop_category.get_image()
-                        .and_then(|f| f(&obj.get_icon_name(), image_size));
-
-                    CivilopediaEntry {
-                        name,
-                        image,
-                        flavour: Some(obj),
-                        y: 0.0,
-                        height: 0.0,
-                        sort_by: obj.get_sort_group(&self.ruleset),
-                    }
-                })
-                .collect::<Vec<_>>();
+            let entries = if *loop_category == CivilopediaCategories::Difficulty {
+                // Use Difficulty objects directly
+                loop_category.get_category_iterator(&self.ruleset, &self.tutorial_controller)
+                    .into_iter()
+                    .map(|diff| {
+                        let name = diff.name.clone();
+                        let image = loop_category.get_image()
+                            .and_then(|f| f(&name, image_size));
+                        CivilopediaEntry {
+                            name,
+                            image,
+                            civilopedia: Some(diff.civilopedia.clone()),
+                            flavour: None,
+                            y: 0.0,
+                            height: 0.0,
+                            sort_by: 0,
+                        }
+                    })
+                    .collect::<Vec<_>>()
+            } else {
+                // Legacy trait object path
+                loop_category.get_category_iterator(&self.ruleset, &self.tutorial_controller)
+                    .into_iter()
+                    .map(|obj| {
+                        let name = obj.name().to_string();
+                        let image = loop_category.get_image()
+                            .and_then(|f| f(&obj.get_icon_name(), image_size));
+                        CivilopediaEntry {
+                            name,
+                            image,
+                            civilopedia: None,
+                            flavour: Some(obj),
+                            y: 0.0,
+                            height: 0.0,
+                            sort_by: 0,
+                        }
+                    })
+                    .collect::<Vec<_>>()
+            };
 
             self.category_to_entries.insert(*loop_category, entries);
         }

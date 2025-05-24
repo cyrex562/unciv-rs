@@ -5,4 +5,4 @@ edition = "2021"
 
 [dependencies]
 rand = "0.9.1"
-core = { path = "../core" }
+unciv_core = { path = "../unciv_core" }
