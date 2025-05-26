@@ -1,9 +1,0 @@
-/home/azrael/Projects/Unciv/rust_port/target/debug/deps/libaccesskit_consumer-b44ae1717172d945.rmeta: /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_consumer-0.15.2/src/lib.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_consumer-0.15.2/src/tree.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_consumer-0.15.2/src/node.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_consumer-0.15.2/src/iterators.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_consumer-0.15.2/src/text.rs
-
-/home/azrael/Projects/Unciv/rust_port/target/debug/deps/accesskit_consumer-b44ae1717172d945.d: /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_consumer-0.15.2/src/lib.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_consumer-0.15.2/src/tree.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_consumer-0.15.2/src/node.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_consumer-0.15.2/src/iterators.rs /home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_consumer-0.15.2/src/text.rs
-
-/home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_consumer-0.15.2/src/lib.rs:
-/home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_consumer-0.15.2/src/tree.rs:
-/home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_consumer-0.15.2/src/node.rs:
-/home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_consumer-0.15.2/src/iterators.rs:
-/home/azrael/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_consumer-0.15.2/src/text.rs:

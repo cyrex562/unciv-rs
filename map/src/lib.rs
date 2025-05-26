@@ -11,3 +11,5 @@ pub mod unit_movement;
 pub mod unit;
 pub mod mapunit;
 pub mod tile;
+pub mod map_parameters;
+pub mod position;

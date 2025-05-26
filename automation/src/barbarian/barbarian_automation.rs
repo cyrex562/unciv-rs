@@ -1,11 +1,5 @@
 // Update the import path to the correct module where Civilization is defined
 
-use crate::{
-    automation::unit::{BattleHelper, UnitAutomation},
-    civilization::civilization::Civilization,
-    map::MapUnit,
-    constants::BARBARIAN_ENCAMPMENT
-};
 
 /// Handles automation of barbarian units in the game.
 pub struct BarbarianAutomation<'a> {

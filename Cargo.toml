@@ -1,2 +1,14 @@
 [workspace]
-members = [ "ai", "automation", "barbarians", "battle", "city", "civilization", "unciv_core", "diplomacy", "espionage", "main", "map", "mods", "multiplayer", "rules", "simulation", "trade", "ui", "units", "util"]
+members = [ "ai", "automation", "barbarians", "battle", "city", "faction", "diplomacy", "espionage", "map", "mods", "multiplayer", "rules", "simulation", "trade", "ui", "units", "util", "encyclopedia", "graphics", "sound", "server", "translation"]
+
+[package]
+name = "unciv"
+version = "0.1.0"
+resolver = "3"
+
+[[bin]]
+name = "unciv"
+
+[dependencies]
+tracing = "^0.1"
+tracing-subscriber = { version="^0.3", features=["env-filter","fmt"] }

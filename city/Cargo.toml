@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 units = { path = "../units" }
+tracing = "0.1"

@@ -1,3 +1,5 @@
+mod mod_constants;
+
 pub fn remove_missing_mod_references(game_info: &mut GameInfo) {
     game_info
         .tile_map

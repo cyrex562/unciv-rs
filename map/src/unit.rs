@@ -213,9 +213,7 @@ pub struct UnitStatus {
     pub turns_left: i32,
 }
 
-pub struct Civilization {
-    pub name: String,
-}
+
 
 pub struct BaseUnit {
     pub name: String,

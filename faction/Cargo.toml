@@ -1,0 +1,9 @@
+[package]
+name = "faction"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = "1.0.219"
+tracing = "0.1"
+units = { path = "../units" }

@@ -20,3 +20,5 @@ pub mod speed;
 pub mod tutorial;
 pub mod victory;
 pub mod construction_new;
+pub mod base_ruleset;
+pub mod game_parameters;

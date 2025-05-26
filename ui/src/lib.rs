@@ -6,3 +6,4 @@ pub mod object_descriptions;
 pub mod popups;
 pub mod screens;
 pub mod base_screen;
+mod progress_bar;

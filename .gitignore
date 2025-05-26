@@ -27,11 +27,7 @@ Cargo.lock
 /doc/
 /docs/
 
-# Project-specific paths
-rust_port/target/*
-rust_port/target/debug/*
-rust_port/Cargo.lock
-rust_port/target/.rustc_info.json
+
 
 
 /incremental-data/
