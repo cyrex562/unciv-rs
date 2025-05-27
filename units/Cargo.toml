@@ -9,3 +9,4 @@ serde = { version = "1.0.219", features = ["derive"] }
 map = { path = "../map" }
 rules = { path = "../rules" }
 util = { path = "../util" }
+uuid = { version = "1.17.0", features= ["v7"] }

@@ -2,11 +2,8 @@ use std::collections::{HashMap, HashSet};
 use std::option::Option;
 use std::rc::Rc;
 use serde::{Deserialize, Serialize};
-use crate::models::map_unit::MapUnit;
-use crate::models::game_info::Position;
-use crate::models::ruleset::{ResourceType, Terrain, TerrainType};
-use crate::models::city::City;
-use crate::unique_type::UniqueType;
+use crate::position::Position;
+
 
 /// Migrate to tile history
     pub fn migrate_to_tile_history(game_info: &mut GameInfo) {

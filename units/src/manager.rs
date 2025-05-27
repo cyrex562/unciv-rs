@@ -1,3 +1,4 @@
+use crate::action::UnitAction;
 use crate::unit_move::UnitMove;
 
 pub struct MovementOrder {
@@ -26,7 +27,9 @@ pub struct UnitManager {
     // stores the moves made by units in previous turns
     pub past_moves: Vec<UnitMove>,
     // stores planned moves for units, which may take multiple turns to complete
-    pub planned_moves: Vec<PlannedUnitMove>
+    pub planned_moves: Vec<PlannedUnitMove>,
+    // action history for all units
+    pub action_log: Vec<UnitAction>
 }
 
 impl UnitManager {

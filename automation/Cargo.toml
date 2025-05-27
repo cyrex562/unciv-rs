@@ -1,8 +1,0 @@
-[package]
-name = "automation"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-map = { path = "../map" }
-tracing = "0.1"

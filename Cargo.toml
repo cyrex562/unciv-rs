@@ -1,10 +1,11 @@
 [workspace]
-members = [ "ai", "automation", "barbarians", "battle", "city", "faction", "diplomacy", "espionage", "map", "mods", "multiplayer", "rules", "simulation", "trade", "ui", "units", "util", "encyclopedia", "graphics", "sound", "server", "translation"]
+members = [ "ai", "combat", "city", "faction", "diplomacy", "espionage", "map", "mods", "multiplayer", "rules", "simulation", "trade", "ui", "units", "util", "encyclopedia", "graphics", "sound", "translation", "context"]
 
 [package]
 name = "unciv"
 version = "0.1.0"
 resolver = "3"
+edition = "2024"
 
 [[bin]]
 name = "unciv"

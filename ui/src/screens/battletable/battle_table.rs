@@ -9,9 +9,9 @@ use crate::models::units::Unit;
 use crate::ui::components::UnitPortrait;
 use crate::ui::images::ImageGetter;
 
-/// A table showing battle information
+/// A table showing combat information
 pub struct BattleTable {
-    /// The battle data
+    /// The combat data
     battle: Rc<Battle>,
     /// The attacker unit
     attacker: Rc<Unit>,
@@ -23,7 +23,7 @@ pub struct BattleTable {
     defender_civ: Rc<Civilization>,
     /// The unit portraits
     portraits: Vec<UnitPortrait>,
-    /// The battle data
+    /// The combat data
     battle_data: BattleData,
 }
 
@@ -64,7 +64,7 @@ impl BattleTable {
             40.0,
         ));
 
-        // Initialize battle data
+        // Initialize combat data
         self.battle_data = self.battle.get_battle_data();
     }
 
@@ -72,13 +72,13 @@ impl BattleTable {
     pub fn draw(&self, ui: &mut Ui) -> Response {
         let mut response = Response::default();
 
-        // TODO: Implement battle table drawing logic
+        // TODO: Implement combat table drawing logic
         // This will include:
         // - Drawing unit portraits
         // - Drawing combat stats
         // - Drawing modifiers
         // - Drawing predicted outcomes
-        // - Drawing additional battle information
+        // - Drawing additional combat information
 
         response
     }
@@ -87,7 +87,7 @@ impl BattleTable {
     pub fn update(&mut self) {
         // TODO: Implement update logic
         // This will include:
-        // - Updating battle data
+        // - Updating combat data
         // - Updating unit stats
         // - Updating modifiers
         // - Updating predicted outcomes
@@ -99,4 +99,4 @@ impl BattleTable {
 // - Drawing modifiers
 // - Drawing predicted outcomes
 // - Calculating combat bonuses
-// - Formatting battle text
+// - Formatting combat text

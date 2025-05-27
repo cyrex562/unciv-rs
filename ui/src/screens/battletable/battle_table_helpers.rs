@@ -11,7 +11,7 @@ use crate::utils::translation::tr;
 pub struct BattleTableHelpers;
 
 impl BattleTableHelpers {
-    /// Formats a battle modifier for display
+    /// Formats a combat modifier for display
     pub fn format_modifier(modifier: &BattleModifier) -> String {
         let mut text = String::new();
 
@@ -25,7 +25,7 @@ impl BattleTableHelpers {
         text
     }
 
-    /// Gets the color for a battle stat
+    /// Gets the color for a combat stat
     pub fn get_stat_color(value: f32) -> Color32 {
         if value > 0.0 {
             Color32::from_rgb(0, 255, 0) // Green for positive
@@ -36,12 +36,12 @@ impl BattleTableHelpers {
         }
     }
 
-    /// Formats a battle stat for display
+    /// Formats a combat stat for display
     pub fn format_stat(name: &str, value: f32) -> String {
         format!("{}: {}{:.1}", tr(name), if value > 0.0 { "+" } else { "" }, value)
     }
 
-    /// Draws a battle modifier
+    /// Draws a combat modifier
     pub fn draw_modifier(ui: &mut Ui, modifier: &BattleModifier, rect: Rect) -> Response {
         let text = Self::format_modifier(modifier);
         let color = Self::get_stat_color(modifier.value);
@@ -52,7 +52,7 @@ impl BattleTableHelpers {
         )
     }
 
-    /// Draws a battle stat
+    /// Draws a combat stat
     pub fn draw_stat(ui: &mut Ui, name: &str, value: f32, rect: Rect) -> Response {
         let text = Self::format_stat(name, value);
         let color = Self::get_stat_color(value);

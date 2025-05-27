@@ -11,8 +11,6 @@ pub struct MapUnit {
     pub health: i32,
     pub id: i32,
     pub action: Option<String>,
-    pub automated: bool,
-    pub escorting: bool,
     pub automated_road_connection_destination: Option<Vector2>,
     pub automated_road_connection_path: Option<Vec<Vector2>>,
     pub attacks_this_turn: i32,
@@ -168,98 +166,4 @@ impl MapUnit {
 pub struct Vector2 {
     pub x: i32,
     pub y: i32,
-}
-
-pub struct UnitPromotions {
-    promotions_list: Vec<Promotion>,
-}
-
-impl UnitPromotions {
-    pub fn new() -> Self {
-        Self {
-            promotions_list: Vec::new(),
-        }
-    }
-
-    pub fn get_movement_bonus(&self) -> i32 {
-        // Implementation would calculate movement bonuses from promotions
-        0
-    }
-
-    pub fn promotions(&self) -> &Vec<Promotion> {
-        &self.promotions_list
-    }
-}
-
-pub struct Promotion {
-    pub name: String,
-    pub uniques: Vec<String>,
-}
-
-pub enum UnitMovementMemoryType {
-    None,
-    Regular,
-    Teleport,
-    Airlift,
-}
-
-pub struct UnitMovementMemory {
-    pub position: Vector2,
-    pub memory_type: UnitMovementMemoryType,
-}
-
-pub struct UnitStatus {
-    pub name: String,
-    pub turns_left: i32,
-}
-
-
-
-pub struct BaseUnit {
-    pub name: String,
-    pub movement: i32,
-    pub uniques: Vec<String>,
-}
-
-
-
-pub struct UniqueMap {
-    uniques: Vec<String>,
-}
-
-impl UniqueMap {
-    pub fn new() -> Self {
-        Self {
-            uniques: Vec::new(),
-        }
-    }
-
-    pub fn get_all_uniques(&self) -> Vec<String> {
-        self.uniques.clone()
-    }
-}
-
-pub struct UnitMovement {
-    // Movement-related fields
-}
-
-impl UnitMovement {
-    pub fn new() -> Self {
-        Self {}
-    }
-}
-
-// MapUnitCache has been moved to src/map/unit_cache.rs
-use crate::map::unit_cache::MapUnitCache;
-use crate::tile::tile::Tile;
-
-pub struct Map {
-    // Map data
-}
-
-impl Map {
-    pub fn get_viewable_tiles_for_unit(&self, unit: &MapUnit) -> HashSet<Tile> {
-        // Implementation would determine which tiles a unit can see
-        HashSet::new()
-    }
 }

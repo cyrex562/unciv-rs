@@ -9,3 +9,4 @@ pub mod notification_icons;
 pub mod notification;
 pub mod player_type;
 pub mod popup_alert;
+mod barbarians;

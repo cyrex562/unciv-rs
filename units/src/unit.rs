@@ -3,23 +3,15 @@ use serde::{Deserialize, Serialize};
 use crate::state::UnitState;
 use util::error::Error;
 use crate::class::UnitClass;
+use uuid::Uuid;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum AttackType {
-    Melee {value: u32},
-    Direct {value: u32},
-    Indirect {value: u32},
-    GroundToAir {value: u32},
-    AirToGround {value: u32}, // bombing, strafing, missile launches, etc.
-    SurfaceToSubsurface {value: u32}, // torpedo, depth charge, etc.; inclues air to subsurface
-    SubsurfaceToSurface {value: u32}, // e.g. torpedo
-}
+pub type UnitId = Uuid;
 
 /// Represents the basic information of a unit as specified in Units.json,
 /// in contrast to MapUnit which represents a specific unit on the map
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Unit {
-    pub id: String,
+    pub id: UnitId,
     pub name: String,
     pub class: UnitClass,
     pub state: UnitState,
@@ -29,7 +21,7 @@ impl Unit {
     /// Creates a new BaseUnit with default values
     pub fn new(id: &str, name: &str, class: UnitClass, state: UnitState) -> Self {
         Self {
-            id: id.to_string(),
+            id: Uuid::now_v7(),
             name: name.to_string(),
             class,
             state,
@@ -56,6 +48,8 @@ impl Unit {
         unimplemented!()
         // get the graph of techs that make this unit obsolete.
     }
+    
+    
 
 }
 

@@ -2,7 +2,7 @@ pub mod stage_mouse_over_debug;
 pub mod tutorial_controller;
 pub mod unciv_stage;
 
-pub mod basescreen;
+pub mod screen;
 
 
 use bevy::prelude::*;

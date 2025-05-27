@@ -1,5 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::hash::{Hash, Hasher};
+use uuid::Uuid;
+
+pub type UnitActionId = Uuid;
 
 
 /// Represents a keyboard binding for unit actions
@@ -137,14 +140,14 @@ impl UnitActionType {
 /// Note this is for the buttons offering actions, not the ongoing action stored with a MapUnit
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UnitAction {
+    pub id: UnitActionId,
     /// The type of action
     pub action_type: UnitActionType,
     /// the sound to play
     pub sound: String,
     /// The title to display for this action
     pub title: String,
-    /// unique identifier
-    pub id: String,
+
     /// name of the action
     pub name: String,
     /// description of the action
@@ -166,7 +169,6 @@ impl UnitAction {
         action_type: UnitActionType,
         sound: &str,
         tile: &str,
-        id: &str,
         name: &str,
         description: &str,
         image: &str,
@@ -178,7 +180,7 @@ impl UnitAction {
             action_type,
             sound: sound.to_string(),
             title: tile.to_string(),
-            id: id.to_string(),
+            id: Uuid::now_v7(),
             name: name.to_string(),
             description: description.to_string(),
             image: image.to_string(),

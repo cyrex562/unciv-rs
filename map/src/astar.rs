@@ -1,6 +1,7 @@
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::cmp::Ordering;
-use crate::map::tile::Tile;
+use crate::position::Position;
+use crate::tile::Tile;
 
 /// Represents a tile with its priority in the A* algorithm
 #[derive(Debug, Clone)]
@@ -132,15 +133,9 @@ impl AStar {
     ///
     /// # Returns
     /// The cost of moving between the tiles.
-    fn get_cost(&mut self, from: &Tile, to: &Tile) -> f32 {
-        let key = (from.clone(), to.clone());
-        if let Some(&cost) = self.cost_cache.get(&key) {
-            cost
-        } else {
-            let cost = (self.cost)(from, to);
-            self.cost_cache.insert(key, cost);
-            cost
-        }
+    fn get_cost(&mut self, from: &Position, to: &Position) -> f32 {
+        // TODO: Implement a more efficient caching mechanism
+        unimplemented!()
     }
 
     /// Continues the search process until there are no more tiles left to check.
@@ -187,7 +182,7 @@ impl AStar {
                 new_cost < *self.cumulative_tile_cost.get(neighbor).unwrap_or(&f32::MAX))
             {
                 self.cumulative_tile_cost.insert(neighbor.clone(), new_cost);
-                let priority = new_cost + (self.heuristic)(&current_tile, neighbor);
+                let priority = new_cost + (self.heuristic)(neighbor, &current_tile);
                 self.tiles_to_check.push(TilePriority {
                     tile: neighbor.clone(),
                     priority,
