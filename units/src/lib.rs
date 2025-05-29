@@ -13,3 +13,4 @@ pub mod attack_profile;
 pub mod unit_move;
 pub mod abilities;
 mod air_unit_automation;
+mod move_attack;

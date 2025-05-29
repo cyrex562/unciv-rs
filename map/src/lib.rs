@@ -1,6 +1,4 @@
 pub mod tile_map;
-pub mod astar;
-pub mod bfs;
 pub mod map_saver;
 pub mod map_visualization;
 pub mod neighbor_direction;
@@ -39,4 +37,8 @@ mod tile_normalizer;
 mod unit_promotions;
 mod unit_turn_manager;
 mod unit_upgrade_manager;
+
+pub mod pathfinding;
+mod terrain;
+mod terrain_placement;
 

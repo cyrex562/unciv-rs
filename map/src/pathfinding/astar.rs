@@ -1,37 +1,8 @@
-use petgraph::prelude::*;
-use petgraph::visit::{IntoNeighbors, NodeIndexable};
-use petgraph::Graph;
-use std::collections::{BinaryHeap, HashMap};
-use std::cmp::Ordering;
 use crate::map::GameMap;
-
-/// A node with its priority for the priority queue
-#[derive(Debug, Clone, PartialEq)]
-struct NodePriority {
-    node: NodeIndex,
-    priority: f32,
-}
-
-impl Eq for NodePriority {
-    fn assert_receiver_is_total_eq(&self) {}
-}
-
-impl Ord for NodePriority {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        // Reverse ordering for min-heap behavior (lower priority values come first)
-        // Also handle NaN values by considering them greater
-        other.priority.partial_cmp(&self.priority)
-            .unwrap_or(std::cmp::Ordering::Greater)
-    }
-}
-
-impl PartialOrd for NodePriority {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-
+use petgraph::prelude::*;
+use petgraph::visit::IntoNeighbors;
+use std::collections::{BinaryHeap, HashMap};
+use crate::pathfinding::node_priority::NodePriority;
 
 /// A* pathfinding for petgraph-based maps
 /// Returns a vector of TileIds representing the path from start to goal, or empty if no path found

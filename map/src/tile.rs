@@ -3,7 +3,8 @@ use std::option::Option;
 use std::rc::Rc;
 use serde::{Deserialize, Serialize};
 use crate::position::Position;
-
+use crate::tile_history::TileHistory;
+use crate::unit::MapUnit;
 
 /// Migrate to tile history
     pub fn migrate_to_tile_history(game_info: &mut GameInfo) {
@@ -26,6 +27,7 @@ use crate::position::Position;
 pub struct Tile {
     // Core properties
     pub position: Position,
+    pub terrain: Terrain,
     pub base_terrain: Option<String>,
     pub terrain_features: Vec<String>,
     pub natural_wonder: Option<String>,
